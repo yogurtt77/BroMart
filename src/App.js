@@ -5,11 +5,15 @@ import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import FAQ from './pages/FAQ/FAQ';
 import Complaints from './pages/Complaints/Complaints';
+import Order from './pages/Order/Order';
+import Contacts from './pages/Contacts/Contacts';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
 import Cart from './pages/Cart/Cart';
 import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
+import AdminSign from './pages/AdminSign/AdminSign';
+import Admin from './pages/Admin/Admin';
 
 function App() {
   return (
@@ -20,12 +24,16 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/order" element={<Order />} />
             <Route path="/complaints" element={<Complaints />} />
+            <Route path="/contacts" element={<Contacts />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/category/:categoryId/:subcategoryId" element={<Subcategory />} />
+            <Route path="/admin/sign" element={<AdminSign />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </main>
         <Footer />

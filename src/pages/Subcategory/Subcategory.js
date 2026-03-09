@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './Subcategory.scss';
+import { addToCart } from '../../utils/cart';
 
 const Subcategory = () => {
   const { categoryId, subcategoryId } = useParams();
@@ -113,7 +114,19 @@ const Subcategory = () => {
                   <h3 className="product-name">{product.name}</h3>
                   <div className="product-footer">
                     <span className="product-price">{product.price.toFixed(2)} ₸</span>
-                    <button className="btn-add-cart">В корзину</button>
+                    <button
+                      className="btn-add-cart"
+                      onClick={() =>
+                        addToCart({
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          image: product.image
+                        })
+                      }
+                    >
+                      В корзину
+                    </button>
                   </div>
                 </div>
               </div>

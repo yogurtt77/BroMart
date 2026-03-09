@@ -1,9 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Header.scss';
+import { getCartCount } from '../../utils/cart';
 
 const Header = () => {
   const [cartCount] = useState(0);
+
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const updateCount = () => {
+      setCount(getCartCount());
+    };
+
+    updateCount();
+
+    window.addEventListener('cartUpdated', updateCount);
+    window.addEventListener('storage', updateCount);
+
+    return () => {
+      window.removeEventListener('cartUpdated', updateCount);
+      window.removeEventListener('storage', updateCount);
+    };
+  }, []);
 
   return (
     <header className="header">
@@ -39,7 +58,7 @@ const Header = () => {
           </Link>
           <Link to="/cart" className="cart-link">
             <img src="/icon_exact.svg" alt="Корзина" />
-            <span className="cart-count">{cartCount}</span>
+            <span className="cart-count">{count}</span>
           </Link>
           <button className="search-btn">
             <img src="/search.svg" alt="Поиск" />
