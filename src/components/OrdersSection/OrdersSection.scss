@@ -1,0 +1,36 @@
+.orders-section {
+  .orders-title {
+    margin-bottom: 16px;
+  }
+
+  .orders-alert {
+    margin-bottom: 16px;
+  }
+
+  .order-card {
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .order-items-block {
+    padding: 10px;
+    border-radius: 6px;
+    background: #fff;
+    border: 1px solid #ececec;
+  }
+
+  .order-item-row {
+    margin-top: 6px;
+  }
+
+  .order-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .reject-comment-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

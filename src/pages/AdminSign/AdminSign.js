@@ -1,24 +1,37 @@
 import React, { useState } from 'react';
+import { Alert, Button, Card, Form, Input, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import './AdminSign.scss';
+import apiClient from '../../utils/apiClient';
+import { saveAuthSession, startAuthRefreshScheduler } from '../../utils/auth';
+
+const { Title, Paragraph } = Typography;
 
 const AdminSign = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    setError('');
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Admin sign in (mock):', formData);
+    try {
+      const response = await apiClient.post('/api/v1/auth/login', {
+        login: values.login,
+        password: values.password
+      });
+      const responseBody = response.data;
+      saveAuthSession(responseBody.data || responseBody);
+      startAuthRefreshScheduler();
+      form.resetFields();
+      navigate('/admin');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Ошибка авторизации');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,46 +47,38 @@ const AdminSign = () => {
 
       <div className="content-section">
         <div className="container">
-          <div className="form-wrapper">
-            <h2 className="form-title">Авторизация</h2>
-            <p className="form-subtitle">
+          <Card className="form-wrapper" bordered={false}>
+            <Title level={2} className="form-title">Авторизация</Title>
+            <Paragraph className="form-subtitle">
               Здесь авторизуются родственники и близкие заключённых, чтобы пополнять счёт.
-            </p>
+            </Paragraph>
 
-            <form onSubmit={handleSubmit} className="admin-sign-form">
-              <div className="form-group">
-                <label className="form-label">
-                  Email <span className="required">*</span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="form-input"
-                  required
-                />
-              </div>
+            {error && <Alert type="error" message={error} showIcon className="error-message" />}
 
-              <div className="form-group">
-                <label className="form-label">
-                  Пароль <span className="required">*</span>
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="form-input"
-                  required
-                />
-              </div>
+            <Form form={form} layout="vertical" className="admin-sign-form" onFinish={handleSubmit}>
+              <Form.Item
+                label="Логин"
+                name="login"
+                rules={[{ required: true, message: 'Введите логин' }]}
+              >
+                <Input />
+              </Form.Item>
 
-              <button type="submit" className="btn-submit">
-                ВОЙТИ В АДМИНКУ
-              </button>
-            </form>
-          </div>
+              <Form.Item
+                label="Пароль"
+                name="password"
+                rules={[{ required: true, message: 'Введите пароль' }]}
+              >
+                <Input.Password />
+              </Form.Item>
+
+              <Form.Item className="submit-wrap">
+                <Button type="primary" htmlType="submit" block loading={loading}>
+                  ВОЙТИ В АДМИНКУ
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
         </div>
       </div>
     </div>

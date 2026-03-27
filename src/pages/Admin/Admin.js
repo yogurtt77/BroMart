@@ -1,12 +1,39 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import FacilityForm from '../../components/FacilityForm/FacilityForm';
+import AdminProfileSection from '../../components/AdminProfileSection/AdminProfileSection';
+import PrisonAdminsSection from '../../components/PrisonAdminsSection/PrisonAdminsSection';
+import InmateWalletsSection from '../../components/InmateWalletsSection/InmateWalletsSection';
+import OrdersSection from '../../components/OrdersSection/OrdersSection';
 import './Admin.scss';
 
 const Admin = () => {
+  const [activeSection, setActiveSection] = useState('prison-admins');
+
+  const navigationItems = useMemo(
+    () => [
+      { id: 'prison-admins', label: 'Начальники учреждений' },
+      { id: 'inmate-wallets', label: 'Счета заключенных' },
+      { id: 'orders', label: 'Список заказов' },
+      { id: 'facility', label: 'Учреждений' },
+      { id: 'profile', label: 'Заключённые' }
+    ],
+    []
+  );
+
+  const sectionComponents = {
+    'prison-admins': PrisonAdminsSection,
+    'inmate-wallets': InmateWalletsSection,
+    orders: OrdersSection,
+    facility: FacilityForm,
+    profile: AdminProfileSection
+  };
+
+  const ActiveSectionComponent = sectionComponents[activeSection] || AdminProfileSection;
+
   return (
     <div className="admin-page">
       <div className="page-header">
         <div className="container">
-          <h1 className="page-title">Кабинет родственника</h1>
           <div className="breadcrumb">
             <span>Админ-панель</span>
           </div>
@@ -19,67 +46,20 @@ const Admin = () => {
             <aside className="admin-sidebar">
               <h2 className="sidebar-title">Навигация</h2>
               <ul className="sidebar-menu">
-                <li className="sidebar-item sidebar-item--active">Пополнить счёт</li>
-                <li className="sidebar-item">История пополнений</li>
-                <li className="sidebar-item">Профиль заключённого</li>
+                {navigationItems.map((item) => (
+                  <li
+                    key={item.id}
+                    className={`sidebar-item ${activeSection === item.id ? 'sidebar-item--active' : ''}`}
+                    onClick={() => setActiveSection(item.id)}
+                  >
+                    {item.label}
+                  </li>
+                ))}
               </ul>
             </aside>
 
             <main className="admin-main">
-              <section className="admin-card">
-                <h2 className="admin-card-title">Баланс заключённого</h2>
-                <p className="admin-card-balance">Текущий баланс: 0 ₸</p>
-                <p className="admin-card-note">
-                  Здесь в будущем будет отображаться реальный баланс счёта и данные по лимитам.
-                </p>
-              </section>
-
-              <section className="admin-card">
-                <h2 className="admin-card-title">Пополнить счёт</h2>
-                <p className="admin-card-note">
-                  Форма ниже демонстрационная. Логика оплаты и проверки данных будет добавлена
-                  позднее.
-                </p>
-
-                <div className="admin-topup-grid">
-                  <div className="admin-topup-field">
-                    <span className="label">ФИО заключённого</span>
-                    <input
-                      type="text"
-                      className="admin-input"
-                      placeholder="Введите ФИО заключённого"
-                    />
-                  </div>
-                  <div className="admin-topup-field">
-                    <span className="label">Учреждение</span>
-                    <input
-                      type="text"
-                      className="admin-input"
-                      placeholder="Введите учреждение"
-                    />
-                  </div>
-                  <div className="admin-topup-field">
-                    <span className="label">Сумма пополнения</span>
-                    <input
-                      type="number"
-                      className="admin-input"
-                      placeholder="Введите сумму, ₸"
-                    />
-                  </div>
-                </div>
-
-                <button className="admin-topup-button">Пополнить счёт (макет)</button>
-              </section>
-
-              <section className="admin-card">
-                <h2 className="admin-card-title">Краткая история</h2>
-                <p className="admin-card-note">
-                  Здесь можно будет вывести последние пополнения, статусы платежей и комментарии.
-                </p>
-                <div className="admin-history-placeholder">
-                  Таблица истории пополнений (пока только заглушка).
-                </div>
-              </section>
+              <ActiveSectionComponent />
             </main>
           </div>
         </div>

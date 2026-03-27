@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
@@ -14,8 +14,20 @@ import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
 import AdminSign from './pages/AdminSign/AdminSign';
 import Admin from './pages/Admin/Admin';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import { isAuthenticated, startAuthRefreshScheduler, stopAuthRefreshScheduler } from './utils/auth';
 
 function App() {
+  useEffect(() => {
+    if (isAuthenticated()) {
+      startAuthRefreshScheduler();
+    }
+
+    return () => {
+      stopAuthRefreshScheduler();
+    };
+  }, []);
+
   return (
     <Router>
       <div className="app">
@@ -33,7 +45,14 @@ function App() {
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/category/:categoryId/:subcategoryId" element={<Subcategory />} />
             <Route path="/admin/sign" element={<AdminSign />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route
+              path="/admin"
+              element={(
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              )}
+            />
           </Routes>
         </main>
         <Footer />
