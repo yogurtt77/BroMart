@@ -4,7 +4,6 @@ import './Header.scss';
 import { getCartCount } from '../../utils/cart';
 
 const Header = () => {
-  const [cartCount] = useState(0);
 
   const [count, setCount] = useState(0);
 
