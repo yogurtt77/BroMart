@@ -7,20 +7,17 @@
     border-bottom: 1px solid #e0e0e0;
 
     .page-title {
-      font-size: 32px;
-      font-weight: 600;
+      margin: 0 0 10px !important;
       color: #333;
-      margin: 0 0 10px;
     }
 
-    .breadcrumb {
+    .contacts-breadcrumb {
       font-size: 14px;
-      color: #666;
       display: flex;
       align-items: center;
       gap: 10px;
 
-      span {
+      .ant-typography {
         position: relative;
         padding-left: 20px;
 
@@ -39,80 +36,57 @@
     background: #fff;
 
     .contacts-layout {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 40px;
-      align-items: flex-start;
+      align-items: stretch;
     }
 
     .contacts-card {
       background: #f9f9f9;
       border-radius: 8px;
-      padding: 40px;
+      height: 100%;
+      box-shadow: none;
+
+      .ant-card-body {
+        padding: 40px;
+      }
 
       .section-title {
-        font-size: 26px;
-        font-weight: 600;
-        margin: 0 0 20px;
+        margin: 0 0 16px !important;
         color: #333;
       }
 
       .subtitle {
-        font-size: 14px;
-        color: #777;
-        margin: 0 0 30px;
+        margin-bottom: 24px !important;
       }
 
-      p {
-        font-size: 15px;
-        line-height: 1.6;
-        color: #555;
-        margin: 0 0 15px;
-      }
+      .contacts-descriptions {
+        .ant-descriptions-item-label {
+          font-size: 13px;
+          font-weight: 500;
+          color: #777;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
 
-      .contacts-list {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-top: 10px;
-
-        .contacts-item {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-
-          .label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #777;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-          }
-
-          .value {
-            font-size: 16px;
-            color: #333;
-          }
+        .ant-descriptions-item-content {
+          font-size: 16px;
+          color: #333;
         }
       }
 
       .placeholder-map {
-        margin-top: 30px;
+        margin-top: 24px;
         border-radius: 8px;
         border: 1px dashed #cfcfcf;
         padding: 40px;
         text-align: center;
-        color: #999;
-        font-size: 14px;
         background: #fff;
       }
     }
 
     .contacts-info {
       .section-title {
-        margin-bottom: 16px;
+        margin-bottom: 12px !important;
       }
     }
   }
 }
-

@@ -1,25 +1,51 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Alert, Button, Card, Form, Input, Typography } from 'antd';
+import apiClient from '../../utils/apiClient';
+import { saveAuthSession, startAuthRefreshScheduler } from '../../utils/auth';
 import './Login.scss';
 
+const { Title } = Typography;
+
+const ADMIN_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN'];
+
 const Login = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    remember: false
-  });
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    setError('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Login:', formData);
+    try {
+      const response = await apiClient.post('/api/v1/auth/login', {
+        login: values.login,
+        password: values.password
+      });
+      const body = response.data;
+      const data = body.data || body;
+      const userRole = data.user_role || body.user_role;
+      saveAuthSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        token_type: data.token_type,
+        user_role: userRole
+      });
+      startAuthRefreshScheduler();
+      form.resetFields();
+
+      if (ADMIN_ROLES.includes(userRole)) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Ошибка авторизации');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,66 +61,35 @@ const Login = () => {
 
       <div className="content-section">
         <div className="container">
-          <div className="form-wrapper">
-            <h2 className="form-title">Вход</h2>
+          <Card className="form-wrapper" bordered={false}>
+            <Title level={2} className="form-title">Вход</Title>
 
-            <form onSubmit={handleSubmit} className="login-form">
-              <div className="form-group">
-                <label className="form-label">
-                  Имя пользователя или Email <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="form-input"
-                  required
-                />
-              </div>
+            {error && <Alert type="error" message={error} showIcon className="login-alert" />}
 
-              <div className="form-group">
-                <label className="form-label">
-                  Пароль <span className="required">*</span>
-                </label>
-                <div className="password-input-wrapper">
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="form-input"
-                    required
-                  />
-                  <button type="button" className="password-toggle">
-                    <img src="/eye-icon.svg" alt="Показать пароль" />
-                  </button>
-                </div>
-              </div>
+            <Form form={form} layout="vertical" onFinish={handleSubmit}>
+              <Form.Item
+                label="Логин"
+                name="login"
+                rules={[{ required: true, message: 'Введите логин' }]}
+              >
+                <Input />
+              </Form.Item>
 
-              <div className="form-group checkbox-group">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="remember"
-                    checked={formData.remember}
-                    onChange={handleChange}
-                  />
-                  <span>Запомнить меня</span>
-                </label>
-              </div>
+              <Form.Item
+                label="Пароль"
+                name="password"
+                rules={[{ required: true, message: 'Введите пароль' }]}
+              >
+                <Input.Password />
+              </Form.Item>
 
-              <button type="submit" className="btn-submit">
-                ВОЙТИ
-              </button>
-
-              <div className="form-footer">
-                <Link to="/forgot-password" className="forgot-link">
-                  Забыли свой пароль?
-                </Link>
-              </div>
-            </form>
-          </div>
+              <Form.Item className="login-submit-wrap">
+                <Button type="primary" htmlType="submit" block loading={loading}>
+                  ВОЙТИ
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
         </div>
       </div>
     </div>
@@ -102,4 +97,3 @@ const Login = () => {
 };
 
 export default Login;
-

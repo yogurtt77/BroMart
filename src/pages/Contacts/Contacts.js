@@ -1,73 +1,85 @@
 import React from 'react';
+import { Card, Col, Descriptions, Row, Typography } from 'antd';
 import './Contacts.scss';
+
+const { Title, Text, Paragraph } = Typography;
+
+const CONTACT_ITEMS = [
+  { key: 'phone', label: 'Телефон', children: '+7 (700) 000-00-00' },
+  { key: 'phone2', label: 'Доп. телефон', children: '+7 (707) 111-11-11' },
+  { key: 'email', label: 'Email', children: 'info@bromart-test.kz' },
+  {
+    key: 'address',
+    label: 'Адрес офиса',
+    children: 'г. Астана, ул. Тестовая 1, Бизнес-центр «BROMART»'
+  },
+  {
+    key: 'hours',
+    label: 'График работы',
+    children: (
+      <>
+        Пн–Пт: 9:00–18:00
+        <br />
+        Сб–Вс: выходной
+      </>
+    )
+  }
+];
 
 const Contacts = () => {
   return (
     <div className="contacts-page">
       <div className="page-header">
         <div className="container">
-          <h1 className="page-title">Контакты</h1>
-          <div className="breadcrumb">
-            <span>Контакты</span>
+          <Title level={1} className="page-title">
+            Контакты
+          </Title>
+          <div className="contacts-breadcrumb">
+            <Text type="secondary">Контакты</Text>
           </div>
         </div>
       </div>
 
       <div className="content-section">
         <div className="container">
-          <div className="contacts-layout">
-            <div className="contacts-card">
-              <h2 className="section-title">Свяжитесь с нами</h2>
-              <p className="subtitle">
-                Данные указаны тестовые и используются только для демонстрации интерфейса.
-              </p>
+          <Row gutter={[40, 40]} className="contacts-layout">
+            <Col xs={24} lg={14}>
+              <Card className="contacts-card" bordered={false}>
+                <Title level={2} className="section-title">
+                  Свяжитесь с нами
+                </Title>
+                <Paragraph type="secondary" className="subtitle">
+                  Данные указаны тестовые и используются только для демонстрации интерфейса.
+                </Paragraph>
+                <Descriptions
+                  column={1}
+                  layout="vertical"
+                  size="middle"
+                  items={CONTACT_ITEMS}
+                  className="contacts-descriptions"
+                />
+              </Card>
+            </Col>
 
-              <div className="contacts-list">
-                <div className="contacts-item">
-                  <span className="label">Телефон</span>
-                  <span className="value">+7 (700) 000-00-00</span>
+            <Col xs={24} lg={10}>
+              <Card className="contacts-card contacts-info" bordered={false}>
+                <Title level={2} className="section-title">
+                  Дополнительная информация
+                </Title>
+                <Paragraph>
+                  Служба поддержки работает в тестовом режиме. Вы можете использовать указанные
+                  контакты как пример для интеграции реальных данных в будущем.
+                </Paragraph>
+                <Paragraph>
+                  При переходе на боевой режим здесь можно разместить данные колл-центра, юридический
+                  адрес, реквизиты компании и ссылки на мессенджеры.
+                </Paragraph>
+                <div className="placeholder-map">
+                  <Text type="secondary">Здесь может быть карта или фотография офиса</Text>
                 </div>
-                <div className="contacts-item">
-                  <span className="label">Доп. телефон</span>
-                  <span className="value">+7 (707) 111-11-11</span>
-                </div>
-                <div className="contacts-item">
-                  <span className="label">Email</span>
-                  <span className="value">info@bromart-test.kz</span>
-                </div>
-                <div className="contacts-item">
-                  <span className="label">Адрес офиса</span>
-                  <span className="value">
-                    г. Астана, ул. Тестовая 1, Бизнес-центр &laquo;BROMART&raquo;
-                  </span>
-                </div>
-                <div className="contacts-item">
-                  <span className="label">График работы</span>
-                  <span className="value">
-                    Пн–Пт: 9:00–18:00
-                    <br />
-                    Сб–Вс: выходной
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="contacts-card contacts-info">
-              <h2 className="section-title">Дополнительная информация</h2>
-              <p>
-                Служба поддержки работает в тестовом режиме. Вы можете использовать указанные
-                контакты как пример для интеграции реальных данных в будущем.
-              </p>
-              <p>
-                При переходе на боевой режим здесь можно разместить данные колл-центра, юридический
-                адрес, реквизиты компании и ссылки на мессенджеры.
-              </p>
-
-              <div className="placeholder-map">
-                <span>Здесь может быть карта или фотография офиса</span>
-              </div>
-            </div>
-          </div>
+              </Card>
+            </Col>
+          </Row>
         </div>
       </div>
     </div>
@@ -75,4 +87,3 @@ const Contacts = () => {
 };
 
 export default Contacts;
-

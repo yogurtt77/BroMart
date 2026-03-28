@@ -7,20 +7,17 @@
     border-bottom: 1px solid #e0e0e0;
 
     .page-title {
-      font-size: 32px;
-      font-weight: 600;
+      margin: 0 0 10px !important;
       color: #333;
-      margin: 0 0 10px;
     }
 
-    .breadcrumb {
+    .faq-breadcrumb {
       font-size: 14px;
-      color: #666;
       display: flex;
       align-items: center;
       gap: 10px;
 
-      span {
+      .ant-typography {
         position: relative;
         padding-left: 20px;
 
@@ -42,49 +39,37 @@
       max-width: 1000px;
       margin: 0 auto;
       background: #f9f9f9;
-      padding: 60px;
+      padding: 48px 40px;
       border-radius: 8px;
+      box-shadow: none;
 
       .content-title {
-        font-size: 28px;
-        font-weight: 600;
         text-align: center;
-        margin: 0 0 40px;
+        margin: 0 0 32px !important;
         color: #333;
       }
 
       .faq-content {
-        h3 {
-          font-size: 20px;
-          font-weight: 600;
-          margin: 0 0 30px;
+        width: 100%;
+
+        .faq-section-title {
+          margin: 0 0 8px !important;
           color: #333;
         }
 
         .faq-item {
-          margin-bottom: 40px;
-
-          h4 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin: 0 0 15px;
-          }
-
-          p {
-            font-size: 15px;
-            line-height: 1.6;
+          .ant-typography {
             color: #555;
-            margin: 0 0 10px;
-
-            strong {
-              color: #333;
-            }
           }
 
-          ol {
-            padding-left: 25px;
-            margin: 10px 0;
+          h5.ant-typography {
+            color: #333;
+            margin: 0 0 12px !important;
+          }
+
+          .faq-list {
+            padding-left: 24px;
+            margin: 8px 0 0;
 
             li {
               font-size: 15px;
@@ -98,4 +83,3 @@
     }
   }
 }
-

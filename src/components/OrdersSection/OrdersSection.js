@@ -9,6 +9,7 @@ const unwrapResponseData = (payload) => payload?.data ?? payload;
 const OrdersSection = () => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState('');
+  const [busyId, setBusyId] = useState(null);
   const [rejectCommentById, setRejectCommentById] = useState({});
   const [rejectModeById, setRejectModeById] = useState({});
   const didLoadRef = useRef(false);
@@ -27,31 +28,47 @@ const OrdersSection = () => {
       const response = await apiClient.get('/api/v1/orders');
       const ordersList = unwrapResponseData(response.data);
       setOrders(Array.isArray(ordersList) ? ordersList : []);
+      setError('');
     } catch (err) {
       setError('Ошибка загрузки списка заказов');
     }
   };
 
-  const handleApprove = (orderId) => {
-    setOrders((prev) => prev.map((order) => (
-      order.id === orderId ? { ...order, status: 'APPROVED' } : order
-    )));
+  const handleApprove = async (orderId) => {
+    setBusyId(orderId);
+    setError('');
+    try {
+      await apiClient.post(`/api/v1/orders/${orderId}/approve`);
+      await loadOrders();
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Ошибка одобрения заказа');
+    } finally {
+      setBusyId(null);
+    }
   };
 
   const handleStartReject = (orderId) => {
     setRejectModeById((prev) => ({ ...prev, [orderId]: true }));
   };
 
-  const handleReject = (orderId) => {
-    const comment = rejectCommentById[orderId] || '';
-
-    setOrders((prev) => prev.map((order) => (
-      order.id === orderId
-        ? { ...order, status: 'REJECTED', rejection_reason: comment }
-        : order
-    )));
-
-    setRejectModeById((prev) => ({ ...prev, [orderId]: false }));
+  const handleReject = async (orderId) => {
+    const reason = rejectCommentById[orderId] || '';
+    setBusyId(orderId);
+    setError('');
+    try {
+      await apiClient.post(`/api/v1/orders/${orderId}/reject`, { reason });
+      setRejectModeById((prev) => ({ ...prev, [orderId]: false }));
+      setRejectCommentById((prev) => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
+      await loadOrders();
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Ошибка отклонения заказа');
+    } finally {
+      setBusyId(null);
+    }
   };
 
   const renderItems = (items) => {
@@ -98,7 +115,11 @@ const OrdersSection = () => {
 
                 {order.status === 'PENDING' ? (
                   <div className="order-actions">
-                    <Button type="primary" onClick={() => handleApprove(order.id)}>
+                    <Button
+                      type="primary"
+                      loading={busyId === order.id}
+                      onClick={() => handleApprove(order.id)}
+                    >
                       Одобрить
                     </Button>
                     <Button danger onClick={() => handleStartReject(order.id)}>
@@ -118,7 +139,11 @@ const OrdersSection = () => {
                         setRejectCommentById((prev) => ({ ...prev, [order.id]: value }));
                       }}
                     />
-                    <Button danger onClick={() => handleReject(order.id)}>
+                    <Button
+                      danger
+                      loading={busyId === order.id}
+                      onClick={() => handleReject(order.id)}
+                    >
                       Подтвердить отклонение
                     </Button>
                   </div>

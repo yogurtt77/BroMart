@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
@@ -8,11 +8,9 @@ import Complaints from './pages/Complaints/Complaints';
 import Order from './pages/Order/Order';
 import Contacts from './pages/Contacts/Contacts';
 import Login from './pages/Login/Login';
-import Register from './pages/Register/Register';
 import Cart from './pages/Cart/Cart';
 import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
-import AdminSign from './pages/AdminSign/AdminSign';
 import Admin from './pages/Admin/Admin';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import { isAuthenticated, startAuthRefreshScheduler, stopAuthRefreshScheduler } from './utils/auth';
@@ -40,11 +38,10 @@ function App() {
             <Route path="/complaints" element={<Complaints />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/category/:categoryId/:subcategoryId" element={<Subcategory />} />
-            <Route path="/admin/sign" element={<AdminSign />} />
+            <Route path="/admin/sign" element={<Navigate to="/login" replace />} />
             <Route
               path="/admin"
               element={(

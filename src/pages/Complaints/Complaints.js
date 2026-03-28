@@ -1,109 +1,84 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Button, Card, Form, Input, Select, Typography } from 'antd';
 import './Complaints.scss';
 
+const { Title, Text } = Typography;
+
+const INSTITUTION_OPTIONS = [{ value: 'Учреждение 57', label: 'Учреждение 57' }];
+
 const Complaints = () => {
-  const [formData, setFormData] = useState({
-    lastName: '',
-    firstName: '',
-    middleName: '',
-    institution: 'Учреждение 57',
-    message: ''
-  });
+  const [form] = Form.useForm();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
+  const handleSubmit = (values) => {
+    console.log('Form submitted:', values);
   };
 
   return (
     <div className="complaints-page">
       <div className="page-header">
         <div className="container">
-          <h1 className="page-title">Жалобы и предложения</h1>
-          <div className="breadcrumb">
-            <span>Жалобы и предложения</span>
+          <Title level={1} className="page-title">
+            Жалобы и предложения
+          </Title>
+          <div className="complaints-breadcrumb">
+            <Text type="secondary">Жалобы и предложения</Text>
           </div>
         </div>
       </div>
 
       <div className="content-section">
         <div className="container">
-          <div className="form-wrapper">
-            <h2 className="form-title">Ваши жалобы и предложения</h2>
+          <Card className="form-wrapper" bordered={false}>
+            <Title level={2} className="form-title">
+              Ваши жалобы и предложения
+            </Title>
 
-            <form onSubmit={handleSubmit} className="complaints-form">
-              <div className="form-group">
-                <input
-                  type="text"
-                  name="lastName"
-                  placeholder="Фамилия получателя"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="form-input"
-                  required
-                />
-              </div>
+            <Form
+              form={form}
+              layout="vertical"
+              initialValues={{ institution: 'Учреждение 57' }}
+              onFinish={handleSubmit}
+              className="complaints-form"
+            >
+              <Form.Item
+                name="lastName"
+                rules={[{ required: true, message: 'Укажите фамилию' }]}
+              >
+                <Input placeholder="Фамилия получателя" />
+              </Form.Item>
 
-              <div className="form-group">
-                <input
-                  type="text"
-                  name="firstName"
-                  placeholder="Имя получателя"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="form-input"
-                  required
-                />
-              </div>
+              <Form.Item
+                name="firstName"
+                rules={[{ required: true, message: 'Укажите имя' }]}
+              >
+                <Input placeholder="Имя получателя" />
+              </Form.Item>
 
-              <div className="form-group">
-                <input
-                  type="text"
-                  name="middleName"
-                  placeholder="Отчество получателя"
-                  value={formData.middleName}
-                  onChange={handleChange}
-                  className="form-input"
-                  required
-                />
-              </div>
+              <Form.Item
+                name="middleName"
+                rules={[{ required: true, message: 'Укажите отчество' }]}
+              >
+                <Input placeholder="Отчество получателя" />
+              </Form.Item>
 
-              <div className="form-group">
-                <select
-                  name="institution"
-                  value={formData.institution}
-                  onChange={handleChange}
-                  className="form-select"
-                >
-                  <option value="Учреждение 57">Учреждение 57</option>
-                </select>
-              </div>
+              <Form.Item name="institution">
+                <Select options={INSTITUTION_OPTIONS} />
+              </Form.Item>
 
-              <div className="form-group">
-                <textarea
-                  name="message"
-                  placeholder="Ваши предложения"
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="form-textarea"
-                  rows="6"
-                  required
-                ></textarea>
-              </div>
+              <Form.Item
+                name="message"
+                rules={[{ required: true, message: 'Введите текст' }]}
+              >
+                <Input.TextArea rows={6} placeholder="Ваши предложения" />
+              </Form.Item>
 
-              <button type="submit" className="btn-submit">
-                ОТПРАВИТЬ
-              </button>
-            </form>
-          </div>
+              <Form.Item className="complaints-submit-wrap">
+                <Button type="primary" htmlType="submit" block>
+                  ОТПРАВИТЬ
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
         </div>
       </div>
     </div>
@@ -111,4 +86,3 @@ const Complaints = () => {
 };
 
 export default Complaints;
-

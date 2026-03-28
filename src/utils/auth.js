@@ -3,6 +3,7 @@ import axios from 'axios';
 const ACCESS_TOKEN_KEY = 'authAccessToken';
 const REFRESH_TOKEN_KEY = 'authRefreshToken';
 const TOKEN_TYPE_KEY = 'authTokenType';
+const USER_ROLE_KEY = 'authUserRole';
 const DEFAULT_TOKEN_TYPE = 'Bearer';
 const API_BASE_URL = 'https://self-service-kiosk-production-10bc.up.railway.app';
 const REFRESH_INTERVAL_MINUTES = 10;
@@ -25,16 +26,22 @@ export const getTokenType = () => localStorage.getItem(TOKEN_TYPE_KEY) || DEFAUL
 
 export const isAuthenticated = () => Boolean(getAccessToken());
 
-export const saveAuthSession = ({ access_token, refresh_token, token_type }) => {
+export const getUserRole = () => localStorage.getItem(USER_ROLE_KEY) || '';
+
+export const saveAuthSession = ({ access_token, refresh_token, token_type, user_role }) => {
   localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
   localStorage.setItem(REFRESH_TOKEN_KEY, refresh_token);
   localStorage.setItem(TOKEN_TYPE_KEY, normalizeTokenType(token_type));
+  if (user_role) {
+    localStorage.setItem(USER_ROLE_KEY, user_role);
+  }
 };
 
 export const clearAuthSession = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(TOKEN_TYPE_KEY);
+  localStorage.removeItem(USER_ROLE_KEY);
 };
 
 export const refreshAccessToken = async () => {
