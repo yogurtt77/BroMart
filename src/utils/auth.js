@@ -5,7 +5,7 @@ const REFRESH_TOKEN_KEY = 'authRefreshToken';
 const TOKEN_TYPE_KEY = 'authTokenType';
 const USER_ROLE_KEY = 'authUserRole';
 const DEFAULT_TOKEN_TYPE = 'Bearer';
-const API_BASE_URL = 'https://self-service-kiosk-production-10bc.up.railway.app';
+const API_BASE_URL = 'https://self-service-kiosk.up.railway.app';
 const REFRESH_INTERVAL_MINUTES = 10;
 
 let refreshIntervalId = null;
@@ -21,7 +21,7 @@ const normalizeTokenType = (tokenType) => {
 const extractAuthPayload = (responseBody) => responseBody?.data || responseBody;
 
 export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY) || '';
-export const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY) || '';
+const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY) || '';
 export const getTokenType = () => localStorage.getItem(TOKEN_TYPE_KEY) || DEFAULT_TOKEN_TYPE;
 
 export const isAuthenticated = () => Boolean(getAccessToken());
@@ -93,4 +93,4 @@ export const stopAuthRefreshScheduler = () => {
   }
 };
 
-export { API_BASE_URL, REFRESH_INTERVAL_MINUTES };
+export { API_BASE_URL };

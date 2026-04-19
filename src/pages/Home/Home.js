@@ -1,110 +1,98 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Alert, Button, Card, Col, Image, Row, Spin, Typography } from 'antd';
+import apiClient from '../../utils/apiClient';
 import './Home.scss';
 
+const unwrapResponseData = (payload) => payload?.data ?? payload;
+
+const { Title } = Typography;
+
 const Home = () => {
-  const categories = [
-    {
-      id: 1,
-      name: 'Горячее',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-31-okt.-2025-g.-18_21_54-300x300.png',
-      link: '/category/hot'
-    },
-    {
-      id: 2,
-      name: 'Кондитерское',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_14_22-300x300.png'
-    },
-    {
-      id: 3,
-      name: 'Напитки',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_18_19-300x300.png'
-    },
-    {
-      id: 4,
-      name: 'Продукты питания',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_14_30-300x300.png'
-    },
-    {
-      id: 5,
-      name: 'Табачные изделия',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_14_35-300x300.png'
-    },
-    {
-      id: 6,
-      name: 'Чай, кофе, какао',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_14_41-300x300.png'
-    },
-    {
-      id: 7,
-      name: 'Хозяйственные товары',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_15_03-300x300.png'
-    },
-    {
-      id: 8,
-      name: 'Молочные изделия',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_15_12-300x300.png'
-    },
-    {
-      id: 9,
-      name: 'Одежда и обувья',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_25_50-300x300.png'
-    },
-    {
-      id: 10,
-      name: 'Гигиенические товары',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_14_57-300x300.png'
-    },
-    {
-      id: 11,
-      name: 'Соусы и специи',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_15_07-300x300.png'
-    },
-    {
-      id: 12,
-      name: 'Разное',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_15_23-300x300.png'
-    },
-    {
-      id: 13,
-      name: 'Канцелярские товары',
-      icon: 'https://bromart-57.kz/wp-content/uploads/2025/11/chatgpt-image-1-noyab.-2025-g.-01_15_16-300x300.png'
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const didLoadRef = useRef(false);
+
+  useEffect(() => {
+    if (didLoadRef.current) {
+      return;
     }
-  ];
+    didLoadRef.current = true;
+
+    const load = async () => {
+      setError('');
+      try {
+        const response = await apiClient.get('/api/v1/catalog/categories');
+        const list = unwrapResponseData(response.data);
+        setCategories(Array.isArray(list) ? list : []);
+      } catch (err) {
+        setError('Не удалось загрузить каталог');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <div className="home">
       <div className="page-title-section">
         <div className="container">
-          <h1 className="page-title">Главная страница</h1>
+          <Title level={1} className="page-title">
+            Главная страница
+          </Title>
         </div>
       </div>
 
       <section className="hero-section">
-        <div className="hero-pattern"></div>
+        <div className="hero-pattern" />
         <div className="hero-content">
-          <h2 className="hero-title">
+          <Title level={2} className="hero-title">
             Магазин онлайн-покупок
             <br />
             учреждение №57
-          </h2>
-          <button className="btn-primary">Ознакомиться с каталогом</button>
+          </Title>
+          <Button type="default" size="large" href="#catalog" className="hero-cta">
+            Ознакомиться с каталогом
+          </Button>
         </div>
       </section>
 
-      <section className="catalog-section">
+      <section id="catalog" className="catalog-section">
         <div className="container">
-          <h2 className="section-title">Каталог продукции</h2>
-          <div className="categories-grid">
-            {categories.map(category => (
-              <Link key={category.id} to={category.link || '#'} className="category-card">
-                <div className="category-icon">
-                  <img src={category.icon} alt={category.name} />
-                </div>
-                <h3 className="category-name">{category.name}</h3>
-              </Link>
-            ))}
-          </div>
+          <Title level={2} className="section-title">
+            Каталог продукции
+          </Title>
+
+          {error && <Alert type="error" message={error} showIcon className="catalog-alert" />}
+
+          <Spin spinning={loading}>
+            <Row gutter={[40, 40]} className="categories-row">
+              {categories.map((category) => (
+                <Col xs={24} sm={12} lg={6} key={category.id}>
+                  <Link
+                    to={`/category/${category.id}`}
+                    state={{ categoryName: category.name }}
+                    className="category-link"
+                  >
+                    <Card
+                      hoverable
+                      bordered={false}
+                      className="category-card"
+                      cover={
+                        <div className="category-cover">
+                          <Image src={category.icon_url} alt={category.name} preview={false} />
+                        </div>
+                      }
+                    >
+                      <Card.Meta title={category.name} className="category-meta" />
+                    </Card>
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          </Spin>
         </div>
       </section>
     </div>
