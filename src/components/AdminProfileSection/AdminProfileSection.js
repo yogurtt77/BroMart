@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Spin, Typography } from 'antd';
 import apiClient from '../../utils/apiClient';
 import './AdminProfileSection.scss';
 
@@ -11,6 +11,7 @@ const AdminProfileSection = () => {
   const [form] = Form.useForm();
   const [inmates, setInmates] = React.useState([]);
   const [facilities, setFacilities] = React.useState([]);
+  const [fetching, setFetching] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const didLoadRef = React.useRef(false);
@@ -38,6 +39,8 @@ const AdminProfileSection = () => {
       setFacilities(Array.isArray(facilitiesList) ? facilitiesList : []);
     } catch (err) {
       setError('Ошибка загрузки заключённых или учреждений');
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -81,6 +84,7 @@ const AdminProfileSection = () => {
 
       {error && <Alert type="error" message={error} showIcon className="section-alert" />}
 
+      <Spin spinning={fetching}>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Row gutter={16}>
           <Col xs={24} md={12}>
@@ -158,6 +162,7 @@ const AdminProfileSection = () => {
           ))}
         </Row>
       </div>
+      </Spin>
     </section>
   );
 };

@@ -1,137 +1,210 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import './Subcategory.scss';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
+import { AppstoreOutlined, BarsOutlined, RightOutlined } from '@ant-design/icons';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Image,
+  Input,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Typography
+} from 'antd';
+import apiClient from '../../utils/apiClient';
 import { addToCart } from '../../utils/cart';
+import './Subcategory.scss';
+
+const unwrapResponseData = (payload) => payload?.data ?? payload;
+
+const { Title, Text } = Typography;
+
+const SORT_OPTIONS = [
+  { value: 'default', label: 'Исходная сортировка' },
+  { value: 'price-asc', label: 'Цена: по возрастанию' },
+  { value: 'price-desc', label: 'Цена: по убыванию' },
+  { value: 'name', label: 'По названию' }
+];
+
+const itemPhoto = (p) => p.image_url;
+
+const sortParams = (sortBy) => {
+  if (sortBy === 'price-asc') {
+    return { sort_by: 'price', sort: 'asc' };
+  }
+  if (sortBy === 'price-desc') {
+    return { sort_by: 'price', sort: 'desc' };
+  }
+  if (sortBy === 'name') {
+    return { sort_by: 'name', sort: 'asc' };
+  }
+  return {};
+};
 
 const Subcategory = () => {
   const { categoryId, subcategoryId } = useParams();
+  const location = useLocation();
+  const categoryName = location.state?.categoryName ?? 'Категория';
+  const vendorName = location.state?.vendorName ?? 'Поставщик';
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [sortBy, setSortBy] = useState('default');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Данные подкатегорий
-  const subcategories = {
-    hot: {
-      kfc: {
-        name: 'КФС',
-        categoryName: 'Товары',
-        products: [
-          {
-            id: 1,
-            name: 'KFC Баскет 12 крылышек + 6 ножки',
-            price: 13750.0,
-            category: 'КФС',
-            image: 'https://bromart-57.kz/wp-content/uploads/2025/11/ttttt.jpg'
-          },
-          {
-            id: 2,
-            name: 'KFC Баскет 12 ножки',
-            price: 9900.0,
-            category: 'КФС',
-            image: 'https://bromart-57.kz/wp-content/uploads/2025/11/ttttt.jpg'
-          },
-          {
-            id: 3,
-            name: 'KFC Баскет 16 Крылышек + 16 Стрипсов',
-            price: 13750.0,
-            category: 'КФС',
-            image: 'https://bromart-57.kz/wp-content/uploads/2025/11/ttttt.jpg'
-          }
-        ]
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      const params = {
+        vendor_id: subcategoryId,
+        ...sortParams(sortBy)
+      };
+      const trimmed = searchQuery.trim();
+      if (sortBy === 'name' && trimmed) {
+        params.search = trimmed;
       }
+      try {
+        const response = await apiClient.get('/api/v1/catalog/products', {
+          params,
+          signal
+        });
+        const list = unwrapResponseData(response.data);
+        setProducts(Array.isArray(list) ? list : []);
+      } catch {
+        if (signal.aborted) return;
+        setError('Не удалось загрузить товары');
+        setProducts([]);
+      } finally {
+        if (!signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+    return () => controller.abort();
+  }, [subcategoryId, sortBy, searchQuery]);
+
+  const handleSortChange = (value) => {
+    setSortBy(value);
+    if (value !== 'name') {
+      setSearchQuery('');
     }
   };
 
-  const subcategory = subcategories[categoryId]?.[subcategoryId];
-
-  if (!subcategory) {
-    return <div>Подкатегория не найдена</div>;
-  }
+  const addProduct = (product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price ?? 0),
+      image: itemPhoto(product)
+    });
+  };
 
   return (
     <div className="subcategory-page">
       <div className="page-header">
         <div className="container">
-          <h1 className="page-title">{subcategory.name}</h1>
+          <Title level={1} className="page-title">
+            {vendorName}
+          </Title>
           <div className="breadcrumb">
             <Link to="/">⌂</Link>
-            <span className="separator">›</span>
-            <Link to={`/category/${categoryId}`}>{subcategory.categoryName}</Link>
-            <span className="separator">›</span>
-            <span>{subcategory.name}</span>
+            <RightOutlined className="breadcrumb-sep" />
+            <Link to={`/category/${categoryId}`} state={{ categoryName }}>
+              {categoryName}
+            </Link>
+            <RightOutlined className="breadcrumb-sep" />
+            <span className="breadcrumb-current">{vendorName}</span>
           </div>
         </div>
       </div>
 
       <div className="content-section">
         <div className="container">
-          <div className="toolbar">
-            <div className="view-controls">
-              <button
-                className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <rect x="2" y="2" width="7" height="7" />
-                  <rect x="11" y="2" width="7" height="7" />
-                  <rect x="2" y="11" width="7" height="7" />
-                  <rect x="11" y="11" width="7" height="7" />
-                </svg>
-              </button>
-              <button
-                className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                  <rect x="2" y="3" width="16" height="2" />
-                  <rect x="2" y="9" width="16" height="2" />
-                  <rect x="2" y="15" width="16" height="2" />
-                </svg>
-              </button>
-            </div>
+          {error && <Alert type="error" message={error} showIcon className="subcategory-alert" />}
 
-            <div className="sort-control">
-              <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
-                <option value="default">Исходная сортировка</option>
-                <option value="price-asc">Цена: по возрастанию</option>
-                <option value="price-desc">Цена: по убыванию</option>
-                <option value="name">По названию</option>
-              </select>
-            </div>
+          <div className="products-toolbar">
+            <Space wrap size="middle" className="products-toolbar-inner">
+              <Space.Compact>
+                <Button
+                  type={viewMode === 'grid' ? 'primary' : 'default'}
+                  icon={<AppstoreOutlined />}
+                  onClick={() => setViewMode('grid')}
+                  aria-label="Сетка"
+                />
+                <Button
+                  type={viewMode === 'list' ? 'primary' : 'default'}
+                  icon={<BarsOutlined />}
+                  onClick={() => setViewMode('list')}
+                  aria-label="Список"
+                />
+              </Space.Compact>
 
-            <div className="view-info">
-              ПРОСМОТРЕТЬ: <span>12 / 24 / ВСЕ</span>
-            </div>
+              <Select
+                className="sort-select"
+                value={sortBy}
+                onChange={handleSortChange}
+                options={SORT_OPTIONS}
+              />
+
+              {sortBy === 'name' ? (
+                <Input.Search
+                  allowClear
+                  placeholder="Поиск по названию"
+                  onSearch={setSearchQuery}
+                  onClear={() => setSearchQuery('')}
+                  style={{ width: 280 }}
+                />
+              ) : null}
+
+              <Text type="secondary" className="products-count">
+                Товаров: {products.length}
+              </Text>
+            </Space>
           </div>
 
-          <div className={`products-grid ${viewMode}`}>
-            {subcategory.products.map(product => (
-              <div key={product.id} className="product-card">
-                <div className="product-image">
-                  <img src={product.image} alt={product.name} />
-                </div>
-                <div className="product-info">
-                  <span className="product-category">{product.category}</span>
-                  <h3 className="product-name">{product.name}</h3>
-                  <div className="product-footer">
-                    <span className="product-price">{product.price.toFixed(2)} ₸</span>
-                    <button
-                      className="btn-add-cart"
-                      onClick={() =>
-                        addToCart({
-                          id: product.id,
-                          name: product.name,
-                          price: product.price,
-                          image: product.image
-                        })
-                      }
-                    >
-                      В корзину
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Spin spinning={loading}>
+            <Row
+              gutter={[30, 30]}
+              className={`products-row products-row--${viewMode}`}
+            >
+              {products.map((product) => (
+                <Col xs={24} md={viewMode === 'grid' ? 8 : 24} key={product.id}>
+                  <Card
+                    hoverable
+                    className={`product-card ${viewMode === 'list' ? 'product-card--list' : ''}`}
+                    cover={
+                      <div className="product-cover">
+                        <Image src={itemPhoto(product)} alt={product.name} preview={false} />
+                      </div>
+                    }
+                  >
+                    <Title level={5} className="product-name">
+                      {product.name}
+                    </Title>
+                    <div className="product-actions">
+                      <Text className="product-price">
+                        {Number(product.price ?? 0).toFixed(2)} ₸
+                      </Text>
+                      <Button type="primary" block onClick={() => addProduct(product)}>
+                        В корзину
+                      </Button>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Spin>
         </div>
       </div>
     </div>

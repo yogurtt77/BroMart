@@ -72,7 +72,7 @@ const Category = () => {
                 <Col xs={24} sm={12} lg={6} key={vendor.id}>
                   <Link
                     to={`/category/${categoryId}/${vendor.id}`}
-                    state={{ vendorName: vendor.name }}
+                    state={{ vendorName: vendor.name, categoryName }}
                     className="vendor-link"
                   >
                     <Card

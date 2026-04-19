@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Card, Col, Form, InputNumber, Row, Select, Space, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, InputNumber, Row, Select, Space, Spin, Typography } from 'antd';
 import apiClient from '../../utils/apiClient';
 import './InmateWalletsSection.scss';
 
@@ -9,6 +9,7 @@ const unwrapResponseData = (payload) => payload?.data ?? payload;
 const InmateWalletsSection = () => {
   const [form] = Form.useForm();
   const [wallets, setWallets] = useState([]);
+  const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const didLoadRef = useRef(false);
@@ -23,12 +24,15 @@ const InmateWalletsSection = () => {
   }, []);
 
   const loadWallets = async () => {
+    setFetching(true);
     try {
       const response = await apiClient.get('/api/v1/wallet/inmates');
       const walletsList = unwrapResponseData(response.data);
       setWallets(Array.isArray(walletsList) ? walletsList : []);
     } catch (err) {
       setError('Ошибка загрузки счетов заключённых');
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -61,6 +65,7 @@ const InmateWalletsSection = () => {
 
       {error && <Alert type="error" message={error} showIcon className="wallets-alert" />}
 
+      <Spin spinning={fetching}>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Row gutter={16}>
           <Col xs={24} md={12}>
@@ -108,6 +113,7 @@ const InmateWalletsSection = () => {
           ))}
         </Row>
       </div>
+      </Spin>
     </section>
   );
 };

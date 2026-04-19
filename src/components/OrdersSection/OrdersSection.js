@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Card, Col, Input, Row, Space, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Col, Input, Row, Space, Spin, Tag, Typography } from 'antd';
 import apiClient from '../../utils/apiClient';
 import './OrdersSection.scss';
 
@@ -8,6 +8,7 @@ const unwrapResponseData = (payload) => payload?.data ?? payload;
 
 const OrdersSection = () => {
   const [orders, setOrders] = useState([]);
+  const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState(null);
   const [rejectCommentById, setRejectCommentById] = useState({});
@@ -24,6 +25,7 @@ const OrdersSection = () => {
   }, []);
 
   const loadOrders = async () => {
+    setFetching(true);
     try {
       const response = await apiClient.get('/api/v1/orders');
       const ordersList = unwrapResponseData(response.data);
@@ -31,6 +33,8 @@ const OrdersSection = () => {
       setError('');
     } catch (err) {
       setError('Ошибка загрузки списка заказов');
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -89,6 +93,7 @@ const OrdersSection = () => {
 
       {error && <Alert type="error" message={error} showIcon className="orders-alert" />}
 
+      <Spin spinning={fetching}>
       <Row gutter={[16, 16]}>
         {orders.map((order) => (
           <Col key={order.id} xs={24} lg={12}>
@@ -153,6 +158,7 @@ const OrdersSection = () => {
           </Col>
         ))}
       </Row>
+      </Spin>
     </section>
   );
 };

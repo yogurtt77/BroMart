@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Spin, Typography } from 'antd';
 import './FacilityForm.scss';
 import apiClient from '../../utils/apiClient';
 
@@ -14,6 +14,7 @@ const SECURITY_REGIME_OPTIONS = [
 const FacilityForm = () => {
   const [form] = Form.useForm();
   const [facilities, setFacilities] = useState([]);
+  const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const didLoadFacilitiesRef = useRef(false);
@@ -34,6 +35,8 @@ const FacilityForm = () => {
       setFacilities(Array.isArray(facilitiesList) ? facilitiesList : []);
     } catch (err) {
       setError('Ошибка загрузки учреждений');
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -114,21 +117,23 @@ const FacilityForm = () => {
         </Form.Item>
       </Form>
 
-      <div className="facilities-list">
-        <Title level={4}>Существующие учреждения</Title>
-        <Row gutter={[16, 16]}>
-          {facilities.map((facility) => (
-            <Col key={facility.id} xs={24} sm={12} lg={8}>
-              <Card size="small" hoverable>
-                <Space direction="vertical" size={6}>
-                  <Text strong>{facility.name}</Text>
-                  <Text type="secondary">{facility.code}</Text>
-                </Space>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </div>
+      <Spin spinning={fetching}>
+        <div className="facilities-list">
+          <Title level={4}>Существующие учреждения</Title>
+          <Row gutter={[16, 16]}>
+            {facilities.map((facility) => (
+              <Col key={facility.id} xs={24} sm={12} lg={8}>
+                <Card size="small" hoverable>
+                  <Space direction="vertical" size={6}>
+                    <Text strong>{facility.name}</Text>
+                    <Text type="secondary">{facility.code}</Text>
+                  </Space>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
+      </Spin>
     </section>
   );
 };

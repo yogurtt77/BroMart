@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Spin, Typography } from 'antd';
 import apiClient from '../../utils/apiClient';
 import './PrisonAdminsSection.scss';
 
@@ -12,6 +12,7 @@ const PrisonAdminsSection = () => {
   const [form] = Form.useForm();
   const [admins, setAdmins] = useState([]);
   const [facilities, setFacilities] = useState([]);
+  const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const didLoadRef = useRef(false);
@@ -39,6 +40,8 @@ const PrisonAdminsSection = () => {
       setFacilities(Array.isArray(facilitiesList) ? facilitiesList : []);
     } catch (err) {
       setError('Ошибка загрузки начальников или учреждений');
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -82,6 +85,7 @@ const PrisonAdminsSection = () => {
 
       {error && <Alert type="error" message={error} showIcon className="prison-admins-alert" />}
 
+      <Spin spinning={fetching}>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Row gutter={16}>
           <Col xs={24} md={12}>
@@ -159,6 +163,7 @@ const PrisonAdminsSection = () => {
           ))}
         </Row>
       </div>
+      </Spin>
     </section>
   );
 };
