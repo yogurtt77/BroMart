@@ -61,3 +61,18 @@
     }
   }
 }
+
+.login-face-modal-hint {
+  margin: 0 0 12px;
+  color: #666;
+}
+
+.login-face-video {
+  display: block;
+  width: 100%;
+  min-height: 360px;
+  max-height: min(560px, 62vh);
+  border-radius: 8px;
+  background: #000;
+  object-fit: cover;
+}

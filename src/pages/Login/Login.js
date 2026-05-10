@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Card, Form, Input, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, Modal, Space, Typography, message } from 'antd';
 import apiClient from '../../utils/apiClient';
 import { saveAuthSession, startAuthRefreshScheduler } from '../../utils/auth';
 import './Login.scss';
@@ -13,9 +13,43 @@ const Login = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [faceModalOpen, setFaceModalOpen] = useState(true);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleSubmit = async (values) => {
+  useEffect(() => {
+    if (!faceModalOpen) return undefined;
+
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    });
+
+    return () => {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    };
+  }, [faceModalOpen]);
+
+  const handleFaceCapture = () => {
+    const video = videoRef.current;
+    if (!video?.videoWidth) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    message.success('Снимок снят. Отправка на сервер будет позже.');
+    setFaceModalOpen(false);
+  };
+
+  const handleSubmit = async values => {
     setLoading(true);
     setError('');
 
@@ -62,9 +96,31 @@ const Login = () => {
       <div className="content-section">
         <div className="container">
           <Card className="form-wrapper" bordered={false}>
-            <Title level={2} className="form-title">Вход</Title>
+            <Title level={2} className="form-title">
+              Вход
+            </Title>
 
             {error && <Alert type="error" message={error} showIcon className="login-alert" />}
+
+            <Modal
+              title="Вход по Face ID"
+              open={faceModalOpen}
+              onCancel={() => setFaceModalOpen(false)}
+              destroyOnClose
+              width="min(700px, 64vw)"
+              centered
+              footer={
+                <Space>
+                  <Button onClick={() => setFaceModalOpen(false)}>Отмена</Button>
+                  <Button type="primary" onClick={handleFaceCapture}>
+                    Сделать снимок
+                  </Button>
+                </Space>
+              }
+            >
+              <p className="login-face-modal-hint">Разрешите доступ к камере в браузере.</p>
+              <video ref={videoRef} className="login-face-video" autoPlay playsInline muted />
+            </Modal>
 
             <Form form={form} layout="vertical" onFinish={handleSubmit}>
               <Form.Item

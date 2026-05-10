@@ -102,7 +102,10 @@ const PrisonAdminsSection = () => {
             <Form.Item
               label="Email"
               name="email"
-              rules={[{ required: true, message: 'Введите email' }]}
+              rules={[
+                { required: true, message: 'Введите email' },
+                { type: 'email', message: 'Некорректный email' }
+              ]}
             >
               <Input placeholder="user@example.com" />
             </Form.Item>
@@ -112,9 +115,12 @@ const PrisonAdminsSection = () => {
             <Form.Item
               label="ИИН"
               name="iin"
-              rules={[{ required: true, message: 'Введите ИИН' }]}
+              rules={[
+                { required: true, message: 'Введите ИИН' },
+                { pattern: /^\d{1,12}$/, message: 'Только цифры, не более 12' }
+              ]}
             >
-              <Input placeholder="Введите ИИН" />
+              <Input placeholder="Введите ИИН" maxLength={12} />
             </Form.Item>
           </Col>
 
@@ -132,7 +138,10 @@ const PrisonAdminsSection = () => {
             <Form.Item
               label="Пароль"
               name="password"
-              rules={[{ required: true, message: 'Введите пароль' }]}
+              rules={[
+                { required: true, message: 'Введите пароль' },
+                { min: 8, message: 'Минимум 8 символов' }
+              ]}
             >
               <Input.Password placeholder="Введите пароль" />
             </Form.Item>
