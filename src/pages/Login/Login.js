@@ -42,18 +42,22 @@ const Login = () => {
   useEffect(() => {
     if (!faceModalOpen) return undefined;
 
+    let videoElement = videoRef.current;
+
     navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+      const el = videoRef.current;
+      if (el) {
+        el.srcObject = stream;
+        videoElement = el;
       }
     });
 
     return () => {
       streamRef.current?.getTracks().forEach(t => t.stop());
       streamRef.current = null;
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
+      if (videoElement) {
+        videoElement.srcObject = null;
       }
     };
   }, [faceModalOpen]);
