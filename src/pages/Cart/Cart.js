@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Space } from 'antd';
 import './Cart.scss';
-import { getCartItems } from '../../utils/cart';
+import { changeCartQuantity, getCartItems } from '../../utils/cart';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -75,9 +77,25 @@ const Cart = () => {
                     <div className="cart-item-info">
                       <h3 className="cart-item-name">{item.name}</h3>
                       <div className="cart-item-meta">
-                        <span className="cart-item-price">Цена: {item.price.toFixed(2)} ₸</span><br/>
-                        <span className="cart-item-qty">Количество: {item.quantity || 0}</span><br/>
-                        <span className="cart-item-total">Сумма: {(item.price * (item.quantity || 0)).toFixed(2)} ₸</span>
+                        <span className="cart-item-price">Цена: {item.price.toFixed(2)} ₸</span>
+                        <div className="cart-item-total">
+                          Сумма: {(item.price * (item.quantity || 0)).toFixed(2)} ₸
+                        </div>
+                        <Space className="cart-item-actions" size="small">
+                          <Button
+                            type="default"
+                            size="small"
+                            icon={<MinusOutlined />}
+                            onClick={() => changeCartQuantity(item.id, -1)}
+                          />
+                          <span className="cart-item-qty-value">{item.quantity || 0}</span>
+                          <Button
+                            type="default"
+                            size="small"
+                            icon={<PlusOutlined />}
+                            onClick={() => changeCartQuantity(item.id, 1)}
+                          />
+                        </Space>
                       </div>
                     </div>
                   </div>

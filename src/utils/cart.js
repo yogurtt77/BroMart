@@ -45,6 +45,21 @@ export const addToCart = (product) => {
   window.dispatchEvent(new Event('cartUpdated'));
 };
 
+export const changeCartQuantity = (id, delta) => {
+  const items = getCartItems();
+  const idx = items.findIndex((item) => item.id === id);
+  if (idx === -1) return;
+
+  const next = (items[idx].quantity || 0) + delta;
+  if (next <= 0) {
+    items.splice(idx, 1);
+  } else {
+    items[idx] = { ...items[idx], quantity: next };
+  }
+  saveCartItems(items);
+  window.dispatchEvent(new Event('cartUpdated'));
+};
+
 export const getCartCount = () => {
   const items = getCartItems();
 
