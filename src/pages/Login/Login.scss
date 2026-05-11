@@ -67,12 +67,34 @@
   color: #666;
 }
 
-.login-face-video {
+.login-face-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #0a0a0a;
+}
+
+.login-face-stage .login-face-video {
   display: block;
   width: 100%;
   min-height: 360px;
   max-height: min(560px, 62vh);
-  border-radius: 8px;
-  background: #000;
   object-fit: cover;
+}
+
+.login-face-oval {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: 52%;
+  max-width: 280px;
+  aspect-ratio: 3 / 4;
+  border: 3px solid #1677ff;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 0 28px rgba(22, 119, 255, 0.55);
 }

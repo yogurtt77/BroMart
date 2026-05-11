@@ -12,11 +12,32 @@ const ADMIN_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN'];
 const Login = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [faceLoading, setFaceLoading] = useState(false);
   const [error, setError] = useState('');
   const [faceModalOpen, setFaceModalOpen] = useState(true);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const navigate = useNavigate();
+
+  const completeLogin = responseData => {
+    const body = responseData;
+    const data = body.data || body;
+    const userRole = data.user_role || body.user_role;
+    saveAuthSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      token_type: data.token_type,
+      user_role: userRole
+    });
+    startAuthRefreshScheduler();
+    form.resetFields();
+    setFaceModalOpen(false);
+    if (ADMIN_ROLES.includes(userRole)) {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
+  };
 
   useEffect(() => {
     if (!faceModalOpen) return undefined;
@@ -45,8 +66,23 @@ const Login = () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    message.success('Снимок снят. Отправка на сервер будет позже.');
-    setFaceModalOpen(false);
+
+    canvas.toBlob(async blob => {
+      setFaceLoading(true);
+      setError('');
+      const formData = new FormData();
+      formData.append('file', blob, 'face.jpg');
+      try {
+        const response = await apiClient.post('/api/v1/auth/face-login', formData);
+        const body = response.data;
+        message.info(body.message);
+        completeLogin(body);
+      } catch (err) {
+        message.error(err?.response?.data?.message);
+      } finally {
+        setFaceLoading(false);
+      }
+    }, 'image/jpeg');
   };
 
   const handleSubmit = async values => {
@@ -58,23 +94,7 @@ const Login = () => {
         login: values.login,
         password: values.password
       });
-      const body = response.data;
-      const data = body.data || body;
-      const userRole = data.user_role || body.user_role;
-      saveAuthSession({
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        token_type: data.token_type,
-        user_role: userRole
-      });
-      startAuthRefreshScheduler();
-      form.resetFields();
-
-      if (ADMIN_ROLES.includes(userRole)) {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
+      completeLogin(response.data);
     } catch (err) {
       setError(err?.response?.data?.message || 'Ошибка авторизации');
     } finally {
@@ -112,14 +132,17 @@ const Login = () => {
               footer={
                 <Space>
                   <Button onClick={() => setFaceModalOpen(false)}>Отмена</Button>
-                  <Button type="primary" onClick={handleFaceCapture}>
+                  <Button type="primary" onClick={handleFaceCapture} loading={faceLoading}>
                     Сделать снимок
                   </Button>
                 </Space>
               }
             >
               <p className="login-face-modal-hint">Разрешите доступ к камере в браузере.</p>
-              <video ref={videoRef} className="login-face-video" autoPlay playsInline muted />
+              <div className="login-face-stage">
+                <video ref={videoRef} className="login-face-video" autoPlay playsInline muted />
+                <div className="login-face-oval" aria-hidden />
+              </div>
             </Modal>
 
             <Form form={form} layout="vertical" onFinish={handleSubmit}>

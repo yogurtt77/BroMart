@@ -23,7 +23,7 @@ const getRefreshPromise = () => {
   return refreshPromise;
 };
 
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(config => {
   const accessToken = getAccessToken();
   const tokenType = getTokenType();
 
@@ -43,8 +43,8 @@ apiClient.interceptors.request.use((config) => {
 });
 
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
     const status = error.response?.status;
     const requestUrl = originalRequest?.url || '';

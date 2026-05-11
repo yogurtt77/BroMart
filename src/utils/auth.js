@@ -10,7 +10,7 @@ const REFRESH_INTERVAL_MINUTES = 10;
 
 let refreshIntervalId = null;
 
-const normalizeTokenType = (tokenType) => {
+const normalizeTokenType = tokenType => {
   if (!tokenType) {
     return DEFAULT_TOKEN_TYPE;
   }
@@ -18,7 +18,7 @@ const normalizeTokenType = (tokenType) => {
   return tokenType.toLowerCase() === 'bearer' ? 'Bearer' : tokenType;
 };
 
-const extractAuthPayload = (responseBody) => responseBody?.data || responseBody;
+const extractAuthPayload = responseBody => responseBody?.data || responseBody;
 
 export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY) || '';
 const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY) || '';
@@ -65,9 +65,7 @@ export const refreshAccessToken = async () => {
   return tokens;
 };
 
-export const startAuthRefreshScheduler = (
-  intervalMinutes = REFRESH_INTERVAL_MINUTES
-) => {
+export const startAuthRefreshScheduler = (intervalMinutes = REFRESH_INTERVAL_MINUTES) => {
   if (!getRefreshToken()) {
     return;
   }
@@ -76,14 +74,17 @@ export const startAuthRefreshScheduler = (
     clearInterval(refreshIntervalId);
   }
 
-  refreshIntervalId = setInterval(async () => {
-    try {
-      await refreshAccessToken();
-    } catch (error) {
-      clearAuthSession();
-      stopAuthRefreshScheduler();
-    }
-  }, intervalMinutes * 60 * 1000);
+  refreshIntervalId = setInterval(
+    async () => {
+      try {
+        await refreshAccessToken();
+      } catch (error) {
+        clearAuthSession();
+        stopAuthRefreshScheduler();
+      }
+    },
+    intervalMinutes * 60 * 1000
+  );
 };
 
 export const stopAuthRefreshScheduler = () => {
