@@ -12,8 +12,7 @@ import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
 import Admin from './pages/Admin/Admin';
 import MyOrders from './pages/MyOrders/MyOrders';
-import InmateRoute from './components/InmateRoute/InmateRoute';
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import { InmateRoute, ProtectedRoute } from './components/Routes';
 import { isAuthenticated, startAuthRefreshScheduler, stopAuthRefreshScheduler } from './utils/auth';
 
 function App() {
