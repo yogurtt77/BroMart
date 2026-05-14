@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { Badge, Flex, Layout, Menu } from 'antd';
 import './Header.scss';
@@ -23,7 +23,6 @@ const selectedMenuKey = (pathname) => {
 
 const Header = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [count, setCount] = useState(0);
   const [loggedIn, setLoggedIn] = useState(() => isAuthenticated());
 
@@ -45,9 +44,8 @@ const Header = () => {
   const handleLogout = useCallback(() => {
     clearAuthSession();
     stopAuthRefreshScheduler();
-    setLoggedIn(false);
-    navigate('/');
-  }, [navigate]);
+    window.location.replace('/');
+  }, []);
 
   const showAdmin = loggedIn && getUserRole() !== 'INMATE';
   const showMyOrders = loggedIn && getUserRole() === 'INMATE';
