@@ -1,5 +1,18 @@
 import React from 'react';
-import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Spin, Typography, Upload } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Typography,
+  Upload
+} from 'antd';
 import apiClient from '../../utils/apiClient';
 import './AdminProfileSection.scss';
 
@@ -57,6 +70,7 @@ const AdminProfileSection = () => {
     formData.append('iin', values.iin);
     formData.append('transfer_date', currentDate);
     formData.append('release_date', currentDate);
+    formData.append('security_mode', values.security_mode);
     const file = values.file?.[0]?.originFileObj;
     if (file) {
       formData.append('file', file);
@@ -146,6 +160,20 @@ const AdminProfileSection = () => {
                 ]}
               >
                 <Input.Password placeholder="Введите пароль" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Режим безопасности"
+                name="security_mode"
+                rules={[{ required: true, message: 'Выберите режим безопасности' }]}
+              >
+                <Select placeholder="Выберите режим безопасности">
+                  <Select.Option value="GENERAL">Обычный</Select.Option>
+                  <Select.Option value="STRICT">Строгий</Select.Option>
+                  <Select.Option value="MAXIMUM">Максимальный</Select.Option>
+                </Select>
               </Form.Item>
             </Col>
           </Row>

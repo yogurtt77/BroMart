@@ -3,13 +3,8 @@ import { Alert, Button, Card, Col, Form, Input, Row, Select, Space, Spin, Typogr
 import './FacilityForm.scss';
 import apiClient from '../../utils/apiClient';
 
-const unwrapResponseData = (payload) => payload?.data ?? payload;
+const unwrapResponseData = payload => payload?.data ?? payload;
 const { Title, Text } = Typography;
-const SECURITY_REGIME_OPTIONS = [
-  { value: 'GENERAL', label: 'GENERAL' },
-  { value: 'STRICT', label: 'STRICT' },
-  { value: 'MAXIMUM', label: 'MAXIMUM' }
-];
 
 const FacilityForm = () => {
   const [form] = Form.useForm();
@@ -40,7 +35,7 @@ const FacilityForm = () => {
     }
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async values => {
     setLoading(true);
     setError('');
 
@@ -58,16 +53,13 @@ const FacilityForm = () => {
 
   return (
     <section className="facility-form">
-      <Title level={3} className="facility-title">Создать учреждение</Title>
+      <Title level={3} className="facility-title">
+        Создать учреждение
+      </Title>
 
       {error && <Alert type="error" message={error} showIcon className="facility-alert" />}
 
-      <Form
-        form={form}
-        layout="vertical"
-        className="facility-form-grid"
-        onFinish={handleSubmit}
-      >
+      <Form form={form} layout="vertical" className="facility-form-grid" onFinish={handleSubmit}>
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
@@ -105,7 +97,11 @@ const FacilityForm = () => {
               name="security_regime"
               rules={[{ required: true, message: 'Выберите режим безопасности' }]}
             >
-              <Select options={SECURITY_REGIME_OPTIONS} />
+              <Select placeholder="Выберите режим безопасности">
+                <Select.Option value="GENERAL">Обычный</Select.Option>
+                <Select.Option value="STRICT">Строгий</Select.Option>
+                <Select.Option value="MAXIMUM">Максимальный</Select.Option>
+              </Select>
             </Form.Item>
           </Col>
         </Row>
@@ -121,7 +117,7 @@ const FacilityForm = () => {
         <div className="facilities-list">
           <Title level={4}>Существующие учреждения</Title>
           <Row gutter={[16, 16]}>
-            {facilities.map((facility) => (
+            {facilities.map(facility => (
               <Col key={facility.id} xs={24} sm={12} lg={8}>
                 <Card size="small" hoverable>
                   <Space direction="vertical" size={6}>
