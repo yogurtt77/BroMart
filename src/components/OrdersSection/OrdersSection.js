@@ -76,13 +76,17 @@ const OrdersSection = () => {
   };
 
   const renderItems = (items) => {
-    if (!items?.length) {
+    const list = items || [];
+    if (!list.length) {
       return <Text type="secondary">Нет позиций</Text>;
     }
 
-    return items.map((item, index) => (
-      <div key={`${index}-${item?.id || item?.name || 'order-item'}`} className="order-item-row">
-        <Text>{item?.name || item?.title || `Позиция ${index + 1}`}</Text>
+    return list.map((item) => (
+      <div key={item.id} className="order-item-row">
+        <Text>
+          {item.product_name} — {item.quantity} шт. × {Number(item.unit_price).toLocaleString('ru-RU')} ₸ ={' '}
+          {Number(item.subtotal).toLocaleString('ru-RU')} ₸
+        </Text>
       </div>
     ));
   };
@@ -99,10 +103,10 @@ const OrdersSection = () => {
           <Col key={order.id} xs={24} lg={12}>
             <Card className="order-card" bordered={false}>
               <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                <Text strong>{order.full_name}</Text>
+                <Text strong>{order.user_full_name}</Text>
                 <Text type="secondary">Учреждение: {order.facility_name}</Text>
-                <Text>Сумма заказа: {order.total_amount}</Text>
-                <Text type="secondary">Потрачено в месяце: {order.monthly_spent}</Text>
+                <Text>Сумма заказа: {Number(order.total_amount).toLocaleString('ru-RU')} ₸</Text>
+                <Text type="secondary">{new Date(order.created_at).toLocaleString('ru-RU')}</Text>
                 <div>
                   <Tag color={order.status === 'PENDING' ? 'gold' : order.status === 'APPROVED' ? 'green' : 'red'}>
                     {order.status}
