@@ -9,6 +9,42 @@ const { Title } = Typography;
 
 const ADMIN_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN'];
 
+const faceFrameMetrics = canvas => {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const { data } = ctx.getImageData(0, 0, w, h);
+  const step = 4;
+  let sumL = 0;
+  let n = 0;
+  for (let y = 0; y < h; y += step) {
+    for (let x = 0; x < w; x += step) {
+      const i = (y * w + x) * 4;
+      sumL += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      n++;
+    }
+  }
+  const client_brightness = n ? sumL / n / 255 : 0;
+  const gray = (xi, yi) => {
+    const i = (yi * w + xi) * 4;
+    return 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+  };
+  let lapSum = 0;
+  let lapSumSq = 0;
+  let m = 0;
+  for (let y = 1; y < h - 1; y += 2) {
+    for (let x = 1; x < w - 1; x += 2) {
+      const L = 4 * gray(x, y) - gray(x - 1, y) - gray(x + 1, y) - gray(x, y - 1) - gray(x, y + 1);
+      lapSum += L;
+      lapSumSq += L * L;
+      m++;
+    }
+  }
+  const mean = m ? lapSum / m : 0;
+  const client_blur_score = m ? lapSumSq / m - mean * mean : 0;
+  return { client_brightness, client_blur_score };
+};
+
 const Login = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -62,7 +98,7 @@ const Login = () => {
     };
   }, [faceModalOpen]);
 
-  const handleFaceCapture = () => {
+  const handleFaceCapture = async () => {
     const video = videoRef.current;
     if (!video?.videoWidth) return;
 
@@ -71,11 +107,41 @@ const Login = () => {
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
 
+    const { client_brightness, client_blur_score } = faceFrameMetrics(canvas);
+    let client_face_count = '';
+    let face_bbox = '';
+    if ('FaceDetector' in window) {
+      try {
+        const faces = await new window.FaceDetector({ maxDetectedFaces: 5 }).detect(canvas);
+        client_face_count = String(faces.length);
+        if (faces[0]) {
+          const b = faces[0].boundingBox;
+          face_bbox = JSON.stringify({ x: b.x, y: b.y, width: b.width, height: b.height });
+        }
+      } catch {}
+    }
+
     canvas.toBlob(async blob => {
       setFaceLoading(true);
       setError('');
       const formData = new FormData();
       formData.append('file', blob, 'face.jpg');
+      formData.append('capture_width', String(canvas.width));
+      formData.append('capture_height', String(canvas.height));
+      formData.append('client_face_count', client_face_count);
+      formData.append('client_blur_score', String(client_blur_score));
+      formData.append('client_brightness', String(client_brightness));
+      formData.append('face_bbox', face_bbox);
+      console.log('[POST /api/v1/auth/face-login]', {
+        file: { name: 'face.jpg', size: blob.size, type: blob.type },
+        capture_width: canvas.width,
+        capture_height: canvas.height,
+        client_face_count: client_face_count || '(empty)',
+        client_blur_score,
+        client_brightness,
+        face_bbox: face_bbox || '(empty)',
+        faceDetectorUsed: Boolean('FaceDetector' in window)
+      });
       try {
         const response = await apiClient.post('/api/v1/auth/face-login', formData);
         const body = response.data;
