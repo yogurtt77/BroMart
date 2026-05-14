@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Space } from 'antd';
+import { Button, Space, message } from 'antd';
 import './Cart.scss';
-import { changeCartQuantity, getCartItems } from '../../utils/cart';
+import apiClient from '../../utils/apiClient';
+import { changeCartQuantity, clearCart, getCartItems } from '../../utils/cart';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
+  const [ordering, setOrdering] = useState(false);
 
   useEffect(() => {
     const loadCart = () => {
@@ -35,6 +37,24 @@ const Cart = () => {
     return sum + item.price * qty;
   }, 0);
 
+  const handleOrder = async () => {
+    setOrdering(true);
+    try {
+      await apiClient.post('/api/v1/orders', {
+        items: cartItems.map((item) => ({
+          product_id: item.id,
+          quantity: item.quantity
+        }))
+      });
+      clearCart();
+      setCartItems([]);
+    } catch (err) {
+      message.error(err?.response?.data?.message || 'Не удалось оформить заказ');
+    } finally {
+      setOrdering(false);
+    }
+  };
+
   return (
     <div className="cart-page">
       <div className="page-header">
@@ -50,6 +70,9 @@ const Cart = () => {
             <div className="cart-header-summary">
               <span className="cart-header-summary-label">Сумма заказа:</span>
               <span className="cart-header-summary-value">{total.toFixed(2)} ₸</span>
+              <Button type="primary" loading={ordering} onClick={handleOrder}>
+                Заказать
+              </Button>
             </div>
           )}
         </div>

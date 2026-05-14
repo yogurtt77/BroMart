@@ -1,0 +1,41 @@
+.my-orders-page {
+  min-height: calc(100vh - 200px);
+
+  .page-header {
+    background: #f5f5f5;
+    padding: 30px 0;
+    border-bottom: 1px solid #e0e0e0;
+
+    .page-title {
+      margin: 0 0 10px !important;
+      color: #333;
+    }
+
+    .my-orders-breadcrumb {
+      display: block;
+      padding-left: 20px;
+      position: relative;
+
+      &::before {
+        content: '⌂';
+        position: absolute;
+        left: 0;
+        font-size: 16px;
+      }
+    }
+  }
+
+  .content-section {
+    padding: 40px 0 80px;
+    background: #fff;
+  }
+
+  .my-order-card {
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+
+  .my-order-items-table {
+    margin-top: 16px;
+  }
+}

@@ -11,6 +11,8 @@ import Cart from './pages/Cart/Cart';
 import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
 import Admin from './pages/Admin/Admin';
+import MyOrders from './pages/MyOrders/MyOrders';
+import InmateRoute from './components/InmateRoute/InmateRoute';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import { isAuthenticated, startAuthRefreshScheduler, stopAuthRefreshScheduler } from './utils/auth';
 
@@ -37,6 +39,14 @@ function App() {
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cart" element={<Cart />} />
+            <Route
+              path="/my-orders"
+              element={(
+                <InmateRoute>
+                  <MyOrders />
+                </InmateRoute>
+              )}
+            />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/category/:categoryId/:subcategoryId" element={<Subcategory />} />
             <Route path="/admin/sign" element={<Navigate to="/login" replace />} />

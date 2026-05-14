@@ -4,7 +4,12 @@ import { ShoppingCartOutlined } from '@ant-design/icons';
 import { Badge, Flex, Layout, Menu } from 'antd';
 import './Header.scss';
 import { getCartCount } from '../../utils/cart';
-import { clearAuthSession, getUserRole, isAuthenticated, stopAuthRefreshScheduler } from '../../utils/auth';
+import {
+  clearAuthSession,
+  getUserRole,
+  isAuthenticated,
+  stopAuthRefreshScheduler
+} from '../../utils/auth';
 
 const { Header: AntHeader } = Layout;
 
@@ -12,7 +17,7 @@ const selectedMenuKey = (pathname) => {
   if (pathname === '/' || pathname.startsWith('/category')) {
     return '/';
   }
-  const prefixes = ['/admin', '/login', '/faq', '/complaints', '/contacts'];
+  const prefixes = ['/admin', '/login', '/faq', '/complaints', '/contacts', '/my-orders'];
   return prefixes.find((p) => pathname === p || pathname.startsWith(`${p}/`)) || '';
 };
 
@@ -45,6 +50,7 @@ const Header = () => {
   }, [navigate]);
 
   const showAdmin = loggedIn && getUserRole() !== 'INMATE';
+  const showMyOrders = loggedIn && getUserRole() === 'INMATE';
 
   const menuItems = useMemo(() => {
     const items = [
@@ -53,6 +59,9 @@ const Header = () => {
       { key: '/complaints', label: <Link to="/complaints">Предложения и жалобы</Link> },
       { key: '/contacts', label: <Link to="/contacts">Контакты</Link> },
     ];
+    if (showMyOrders) {
+      items.push({ key: '/my-orders', label: <Link to="/my-orders">Мои заказы</Link> });
+    }
     if (showAdmin) {
       items.push({ key: '/admin', label: <Link to="/admin">Админка</Link> });
     }
@@ -62,7 +71,7 @@ const Header = () => {
         : { key: '/login', label: <Link to="/login">Вход</Link> },
     );
     return items;
-  }, [loggedIn, showAdmin, handleLogout]);
+  }, [loggedIn, showAdmin, showMyOrders, handleLogout]);
 
   const selectedKeys = selectedMenuKey(location.pathname);
   const menuSelectedKeys = selectedKeys ? [selectedKeys] : [];

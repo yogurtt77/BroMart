@@ -60,6 +60,11 @@ export const changeCartQuantity = (id, delta) => {
   window.dispatchEvent(new Event('cartUpdated'));
 };
 
+export const clearCart = () => {
+  localStorage.removeItem(CART_KEY);
+  window.dispatchEvent(new Event('cartUpdated'));
+};
+
 export const getCartCount = () => {
   const items = getCartItems();
 
