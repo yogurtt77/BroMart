@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
-import { AppstoreOutlined, BarsOutlined, RightOutlined } from '@ant-design/icons';
+import { useParams, useLocation } from 'react-router-dom';
+import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
 import {
   Alert,
   Button,
@@ -45,9 +45,8 @@ const sortParams = (sortBy) => {
 };
 
 const Subcategory = () => {
-  const { categoryId, subcategoryId } = useParams();
+  const { subcategoryId } = useParams();
   const location = useLocation();
-  const categoryName = location.state?.categoryName ?? 'Категория';
   const vendorName = location.state?.vendorName ?? 'Поставщик';
 
   const [products, setProducts] = useState([]);
@@ -117,15 +116,6 @@ const Subcategory = () => {
           <Title level={1} className="page-title">
             {vendorName}
           </Title>
-          <div className="breadcrumb">
-            <Link to="/">⌂</Link>
-            <RightOutlined className="breadcrumb-sep" />
-            <Link to={`/category/${categoryId}`} state={{ categoryName }}>
-              {categoryName}
-            </Link>
-            <RightOutlined className="breadcrumb-sep" />
-            <span className="breadcrumb-current">{vendorName}</span>
-          </div>
         </div>
       </div>
 

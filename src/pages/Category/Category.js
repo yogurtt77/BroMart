@@ -54,11 +54,6 @@ const Category = () => {
           <Title level={1} className="page-title">
             {categoryName}
           </Title>
-          <div className="breadcrumb">
-            <Link to="/">⌂</Link>
-            <span className="separator">›</span>
-            <span className="breadcrumb-current">{categoryName}</span>
-          </div>
         </div>
       </div>
 

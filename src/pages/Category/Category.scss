@@ -12,32 +12,6 @@
       font-weight: 600 !important;
       color: #333;
     }
-
-    .breadcrumb {
-      font-size: 14px;
-      color: #666;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      a {
-        color: #666;
-        text-decoration: none;
-        font-size: 16px;
-
-        &:hover {
-          color: #3d6d4f;
-        }
-      }
-
-      .separator {
-        color: #999;
-      }
-
-      .breadcrumb-current {
-        color: #333;
-      }
-    }
   }
 
   .category-alert {
