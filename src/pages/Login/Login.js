@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, Card, Form, Input, Modal, Space, Typography, message } from 'antd';
+import { Button, Card, Form, Input, Modal, Space, Typography, message } from 'antd';
 import apiClient from '../../utils/apiClient';
 import { saveAuthSession, startAuthRefreshScheduler } from '../../utils/auth';
 import './Login.scss';
@@ -49,7 +49,6 @@ const Login = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [faceLoading, setFaceLoading] = useState(false);
-  const [error, setError] = useState('');
   const [faceModalOpen, setFaceModalOpen] = useState(true);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -123,7 +122,6 @@ const Login = () => {
 
     canvas.toBlob(async blob => {
       setFaceLoading(true);
-      setError('');
       const formData = new FormData();
       formData.append('file', blob, 'face.jpg');
       formData.append('capture_width', String(canvas.width));
@@ -157,7 +155,6 @@ const Login = () => {
 
   const handleSubmit = async values => {
     setLoading(true);
-    setError('');
 
     try {
       const response = await apiClient.post('/api/v1/auth/login', {
@@ -166,7 +163,7 @@ const Login = () => {
       });
       completeLogin(response.data);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Ошибка авторизации');
+      message.error(err?.response?.data?.message || 'Ошибка авторизации');
     } finally {
       setLoading(false);
     }
@@ -189,8 +186,6 @@ const Login = () => {
             <Title level={2} className="form-title">
               Вход
             </Title>
-
-            {error && <Alert type="error" message={error} showIcon className="login-alert" />}
 
             <Modal
               title="Вход по Face ID"
