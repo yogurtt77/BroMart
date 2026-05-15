@@ -2,7 +2,7 @@ import React from 'react';
 import { Button, Card, Form, Input, Select, Typography } from 'antd';
 import './Complaints.scss';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const INSTITUTION_OPTIONS = [{ value: 'Тест', label: 'Тест' }];
 
