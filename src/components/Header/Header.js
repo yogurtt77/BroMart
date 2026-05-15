@@ -13,12 +13,12 @@ import {
 
 const { Header: AntHeader } = Layout;
 
-const selectedMenuKey = (pathname) => {
+const selectedMenuKey = pathname => {
   if (pathname === '/' || pathname.startsWith('/category')) {
     return '/';
   }
   const prefixes = ['/admin', '/login', '/faq', '/complaints', '/contacts', '/my-orders'];
-  return prefixes.find((p) => pathname === p || pathname.startsWith(`${p}/`)) || '';
+  return prefixes.find(p => pathname === p || pathname.startsWith(`${p}/`)) || '';
 };
 
 const Header = () => {
@@ -55,7 +55,7 @@ const Header = () => {
       { key: '/', label: <Link to="/">Категории</Link> },
       { key: '/faq', label: <Link to="/faq">Вопрос-ответ</Link> },
       { key: '/complaints', label: <Link to="/complaints">Предложения и жалобы</Link> },
-      { key: '/contacts', label: <Link to="/contacts">Контакты</Link> },
+      { key: '/contacts', label: <Link to="/contacts">Контакты</Link> }
     ];
     if (showMyOrders) {
       items.push({ key: '/my-orders', label: <Link to="/my-orders">Мои заказы</Link> });
@@ -66,7 +66,7 @@ const Header = () => {
     items.push(
       loggedIn
         ? { key: 'logout', label: 'Выйти', onClick: handleLogout }
-        : { key: '/login', label: <Link to="/login">Вход</Link> },
+        : { key: '/login', label: <Link to="/login">Вход</Link> }
     );
     return items;
   }, [loggedIn, showAdmin, showMyOrders, handleLogout]);
@@ -84,18 +84,26 @@ const Header = () => {
           />
         </Link>
 
-        <Flex className="site-header__actions" align="center" gap="middle" flex={1} justify="flex-end">
+        <Flex
+          className="site-header__actions"
+          align="center"
+          gap="middle"
+          flex={1}
+          justify="flex-end"
+        >
           <Menu
             mode="horizontal"
             items={menuItems}
             selectedKeys={menuSelectedKeys}
             className="site-header__menu"
           />
-          <Badge count={count} showZero size="small" color="#3d6d4f">
-            <Link to="/cart" className="site-header__cart">
-              <ShoppingCartOutlined />
-            </Link>
-          </Badge>
+          {showMyOrders && (
+            <Badge count={count} showZero size="small" color="#3d6d4f">
+              <Link to="/cart" className="site-header__cart">
+                <ShoppingCartOutlined />
+              </Link>
+            </Badge>
+          )}
         </Flex>
       </Flex>
     </AntHeader>

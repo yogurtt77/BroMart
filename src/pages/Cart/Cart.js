@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Space, message } from 'antd';
 import './Cart.scss';
@@ -8,6 +8,11 @@ import { changeCartQuantity, clearCart, getCartItems } from '../../utils/cart';
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [ordering, setOrdering] = useState(false);
+  const [wallet, setWallet] = useState({
+    balance: 0,
+    monthly_spent: 0,
+    monthly_limit: 0
+  });
 
   useEffect(() => {
     const loadCart = () => {
@@ -27,6 +32,27 @@ const Cart = () => {
       window.removeEventListener('cartUpdated', handleUpdate);
       window.removeEventListener('storage', handleUpdate);
     };
+  }, []);
+
+  const didLoadWalletRef = useRef(false);
+
+  useEffect(() => {
+    if (didLoadWalletRef.current) {
+      return;
+    }
+
+    didLoadWalletRef.current = true;
+
+    const loadWallet = async () => {
+      try {
+        const response = await apiClient.get('/api/v1/wallet');
+        setWallet(response.data.data);
+      } catch (err) {
+        message.error(err?.response?.data?.message || 'Не удалось загрузить баланс');
+      }
+    };
+
+    loadWallet();
   }, []);
 
   const hasItems = cartItems.length > 0;
@@ -61,6 +87,23 @@ const Cart = () => {
         <div className="container">
           <div className="cart-header-left">
             <h1 className="page-title">Корзина</h1>
+            <div className="cart-wallet">
+              <div className="cart-wallet-title">Остаток на балансе</div>
+              <div className="cart-wallet-stats">
+                <div className="cart-wallet-stat">
+                  <span className="cart-wallet-stat-label">Баланс</span>
+                  <span className="cart-wallet-stat-value">{wallet.balance}</span>
+                </div>
+                <div className="cart-wallet-stat">
+                  <span className="cart-wallet-stat-label">Потрачено за месяц</span>
+                  <span className="cart-wallet-stat-value">{wallet.monthly_spent}</span>
+                </div>
+                <div className="cart-wallet-stat">
+                  <span className="cart-wallet-stat-label">Лимит на месяц</span>
+                  <span className="cart-wallet-stat-value">{wallet.monthly_limit}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {hasItems && (
