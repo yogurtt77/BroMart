@@ -12,7 +12,7 @@ import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
 import Admin from './pages/Admin/Admin';
 import MyOrders from './pages/MyOrders/MyOrders';
-import { InmateRoute, ProtectedRoute } from './components/Routes';
+import { AdminRoute, InmateRoute } from './components/Routes';
 import { isAuthenticated, startAuthRefreshScheduler, stopAuthRefreshScheduler } from './utils/auth';
 
 function App() {
@@ -52,9 +52,9 @@ function App() {
             <Route
               path="/admin"
               element={(
-                <ProtectedRoute>
+                <AdminRoute>
                   <Admin />
-                </ProtectedRoute>
+                </AdminRoute>
               )}
             />
           </Routes>

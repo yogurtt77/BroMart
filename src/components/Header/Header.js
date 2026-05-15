@@ -47,7 +47,7 @@ const Header = () => {
     window.location.replace('/');
   }, []);
 
-  const showAdmin = loggedIn && getUserRole() !== 'INMATE';
+  const showAdmin = loggedIn && ['SUPER_ADMIN', 'PRISON_ADMIN'].includes(getUserRole());
   const showMyOrders = loggedIn && getUserRole() === 'INMATE';
 
   const menuItems = useMemo(() => {
