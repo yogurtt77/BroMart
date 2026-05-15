@@ -43,26 +43,6 @@
       color: #333;
       margin: 0 0 10px;
     }
-
-    .breadcrumb {
-      font-size: 14px;
-      color: #666;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      span {
-        position: relative;
-        padding-left: 20px;
-
-        &::before {
-          content: '⌂';
-          position: absolute;
-          left: 0;
-          font-size: 16px;
-        }
-      }
-    }
   }
 
   .content-section {

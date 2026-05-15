@@ -4,12 +4,12 @@ import './Complaints.scss';
 
 const { Title, Text } = Typography;
 
-const INSTITUTION_OPTIONS = [{ value: 'Учреждение 57', label: 'Учреждение 57' }];
+const INSTITUTION_OPTIONS = [{ value: 'Тест', label: 'Тест' }];
 
 const Complaints = () => {
   const [form] = Form.useForm();
 
-  const handleSubmit = (values) => {
+  const handleSubmit = values => {
     console.log('Form submitted:', values);
   };
 
@@ -20,9 +20,6 @@ const Complaints = () => {
           <Title level={1} className="page-title">
             Жалобы и предложения
           </Title>
-          <div className="complaints-breadcrumb">
-            <Text type="secondary">Жалобы и предложения</Text>
-          </div>
         </div>
       </div>
 
@@ -33,24 +30,12 @@ const Complaints = () => {
               Ваши жалобы и предложения
             </Title>
 
-            <Form
-              form={form}
-              layout="vertical"
-              initialValues={{ institution: 'Учреждение 57' }}
-              onFinish={handleSubmit}
-              className="complaints-form"
-            >
-              <Form.Item
-                name="lastName"
-                rules={[{ required: true, message: 'Укажите фамилию' }]}
-              >
+            <Form form={form} layout="vertical" onFinish={handleSubmit} className="complaints-form">
+              <Form.Item name="lastName" rules={[{ required: true, message: 'Укажите фамилию' }]}>
                 <Input placeholder="Фамилия получателя" />
               </Form.Item>
 
-              <Form.Item
-                name="firstName"
-                rules={[{ required: true, message: 'Укажите имя' }]}
-              >
+              <Form.Item name="firstName" rules={[{ required: true, message: 'Укажите имя' }]}>
                 <Input placeholder="Имя получателя" />
               </Form.Item>
 
@@ -65,10 +50,7 @@ const Complaints = () => {
                 <Select options={INSTITUTION_OPTIONS} />
               </Form.Item>
 
-              <Form.Item
-                name="message"
-                rules={[{ required: true, message: 'Введите текст' }]}
-              >
+              <Form.Item name="message" rules={[{ required: true, message: 'Введите текст' }]}>
                 <Input.TextArea rows={6} placeholder="Ваши предложения" />
               </Form.Item>
 

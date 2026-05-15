@@ -32,21 +32,13 @@ const Admin = () => {
 
   return (
     <div className="admin-page">
-      <div className="page-header">
-        <div className="container">
-          <div className="breadcrumb">
-            <span>Админ-панель</span>
-          </div>
-        </div>
-      </div>
-
       <div className="content-section">
         <div className="container">
           <div className="admin-layout">
             <aside className="admin-sidebar">
               <h2 className="sidebar-title">Навигация</h2>
               <ul className="sidebar-menu">
-                {navigationItems.map((item) => (
+                {navigationItems.map(item => (
                   <li
                     key={item.id}
                     className={`sidebar-item ${activeSection === item.id ? 'sidebar-item--active' : ''}`}
@@ -69,4 +61,3 @@ const Admin = () => {
 };
 
 export default Admin;
-

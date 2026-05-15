@@ -17,18 +17,6 @@
     padding: 100px 0;
     overflow: hidden;
 
-    .hero-pattern {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url('../../assets/bromart.svg');
-      background-repeat: repeat-x;
-      background-size: 150px;
-      background-position: center center;
-    }
-
     .hero-content {
       position: relative;
       text-align: center;

@@ -34,9 +34,6 @@ const Contacts = () => {
           <Title level={1} className="page-title">
             Контакты
           </Title>
-          <div className="contacts-breadcrumb">
-            <Text type="secondary">Контакты</Text>
-          </div>
         </div>
       </div>
 
@@ -71,8 +68,8 @@ const Contacts = () => {
                   контакты как пример для интеграции реальных данных в будущем.
                 </Paragraph>
                 <Paragraph>
-                  При переходе на боевой режим здесь можно разместить данные колл-центра, юридический
-                  адрес, реквизиты компании и ссылки на мессенджеры.
+                  При переходе на боевой режим здесь можно разместить данные колл-центра,
+                  юридический адрес, реквизиты компании и ссылки на мессенджеры.
                 </Paragraph>
                 <div className="placeholder-map">
                   <Text type="secondary">Здесь может быть карта или фотография офиса</Text>

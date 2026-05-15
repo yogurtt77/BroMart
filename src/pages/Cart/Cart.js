@@ -41,7 +41,7 @@ const Cart = () => {
     setOrdering(true);
     try {
       await apiClient.post('/api/v1/orders', {
-        items: cartItems.map((item) => ({
+        items: cartItems.map(item => ({
           product_id: item.id,
           quantity: item.quantity
         }))
@@ -61,9 +61,6 @@ const Cart = () => {
         <div className="container">
           <div className="cart-header-left">
             <h1 className="page-title">Корзина</h1>
-            <div className="breadcrumb">
-              <span>Корзина</span>
-            </div>
           </div>
 
           {hasItems && (

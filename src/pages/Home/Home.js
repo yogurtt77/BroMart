@@ -5,7 +5,7 @@ import apiClient from '../../utils/apiClient';
 import { isAuthenticated } from '../../utils/auth';
 import './Home.scss';
 
-const unwrapResponseData = (payload) => payload?.data ?? payload;
+const unwrapResponseData = payload => payload?.data ?? payload;
 
 const { Title } = Typography;
 
@@ -64,12 +64,9 @@ const Home = () => {
       </div>
 
       <section className="hero-section">
-        <div className="hero-pattern" />
         <div className="hero-content">
           <Title level={2} className="hero-title">
             Магазин онлайн-покупок
-            <br />
-            учреждение №57
           </Title>
           {loggedIn ? (
             <Button type="default" size="large" href="#catalog" className="hero-cta">
@@ -96,7 +93,7 @@ const Home = () => {
 
             <Spin spinning={loading}>
               <Row gutter={[40, 40]} className="categories-row">
-                {categories.map((category) => (
+                {categories.map(category => (
                   <Col xs={24} sm={12} lg={6} key={category.id}>
                     <Link
                       to={`/category/${category.id}`}
