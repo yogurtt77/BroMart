@@ -13,12 +13,14 @@ import {
 
 const { Header: AntHeader } = Layout;
 
-const selectedMenuKey = pathname => {
+const selectedMenuKey = (pathname) => {
   if (pathname === '/' || pathname.startsWith('/category')) {
     return '/';
   }
+
   const prefixes = ['/admin', '/login', '/faq', '/complaints', '/contacts', '/my-orders'];
-  return prefixes.find(p => pathname === p || pathname.startsWith(`${p}/`)) || '';
+
+  return prefixes.find((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) || '';
 };
 
 const Header = () => {
@@ -32,9 +34,11 @@ const Header = () => {
 
   useEffect(() => {
     const updateCount = () => setCount(getCartCount());
+
     updateCount();
     window.addEventListener('cartUpdated', updateCount);
     window.addEventListener('storage', updateCount);
+
     return () => {
       window.removeEventListener('cartUpdated', updateCount);
       window.removeEventListener('storage', updateCount);
@@ -52,22 +56,29 @@ const Header = () => {
 
   const menuItems = useMemo(() => {
     const items = [
-      { key: '/', label: <Link to="/">Категории</Link> },
-      { key: '/faq', label: <Link to="/faq">Вопрос-ответ</Link> },
-      { key: '/complaints', label: <Link to="/complaints">Предложения и жалобы</Link> },
-      { key: '/contacts', label: <Link to="/contacts">Контакты</Link> }
+      { key: '/', label: <Link to="/">Категории</Link> }
     ];
+
     if (showMyOrders) {
       items.push({ key: '/my-orders', label: <Link to="/my-orders">Мои заказы</Link> });
     }
+
+    items.push(
+      { key: '/faq', label: <Link to="/faq">Вопрос-ответ</Link> },
+      { key: '/complaints', label: <Link to="/complaints">Предложения и жалобы</Link> },
+      { key: '/contacts', label: <Link to="/contacts">Контакты</Link> }
+    );
+
     if (showAdmin) {
       items.push({ key: '/admin', label: <Link to="/admin">Админка</Link> });
     }
+
     items.push(
       loggedIn
         ? { key: 'logout', label: 'Выйти', onClick: handleLogout }
         : { key: '/login', label: <Link to="/login">Вход</Link> }
     );
+
     return items;
   }, [loggedIn, showAdmin, showMyOrders, handleLogout]);
 
