@@ -178,7 +178,7 @@ const FacilityAnalyticsSection = () => {
     }
   };
 
-  const openDrawer = async (record) => {
+  const openDrawer = async record => {
     setSelectedFacility(record);
     setDrawerOpen(true);
     await loadFacilityDetails(record.facility_id, {
@@ -188,10 +188,13 @@ const FacilityAnalyticsSection = () => {
     });
   };
 
-  const maxFacilitySpending = Math.max(...spendingChart.map((item) => Number(item.total_amount || 0)), 0);
-  const maxTrendAmount = Math.max(...trendData.map((item) => Number(item.total_amount || 0)), 0);
+  const maxFacilitySpending = Math.max(
+    ...spendingChart.map(item => Number(item.total_amount || 0)),
+    0
+  );
+  const maxTrendAmount = Math.max(...trendData.map(item => Number(item.total_amount || 0)), 0);
 
-  const facilityOptions = facilities.map((item) => ({
+  const facilityOptions = facilities.map(item => ({
     value: item.id,
     label: item.name
   }));
@@ -200,8 +203,12 @@ const FacilityAnalyticsSection = () => {
     <section className="admin-section">
       <div className="admin-section-header">
         <div>
-          <Title level={3} className="admin-section-title">Аналитика по учреждениям</Title>
-          <Text className="admin-section-note">Сводные показатели, таблицы и детализация по каждому учреждению.</Text>
+          <Title level={3} className="admin-section-title">
+            Аналитика по учреждениям
+          </Title>
+          <Text className="admin-section-note">
+            Сводные показатели, таблицы и детализация по каждому учреждению.
+          </Text>
         </div>
         <Space wrap className="admin-toolbar">
           <Select
@@ -209,23 +216,23 @@ const FacilityAnalyticsSection = () => {
             placeholder="Учреждение"
             options={facilityOptions}
             style={{ width: 220 }}
-            onChange={(value) => setFilters((prev) => ({ ...prev, facility_id: value }))}
+            onChange={value => setFilters(prev => ({ ...prev, facility_id: value }))}
           />
           <Input
             type="date"
             value={filters.date_from}
-            onChange={(event) => setFilters((prev) => ({ ...prev, date_from: event.target.value }))}
+            onChange={event => setFilters(prev => ({ ...prev, date_from: event.target.value }))}
           />
           <Input
             type="date"
             value={filters.date_to}
-            onChange={(event) => setFilters((prev) => ({ ...prev, date_to: event.target.value }))}
+            onChange={event => setFilters(prev => ({ ...prev, date_to: event.target.value }))}
           />
           <Select
             value={filters.group_by}
             options={GROUP_BY_OPTIONS}
             style={{ width: 170 }}
-            onChange={(value) => setFilters((prev) => ({ ...prev, group_by: value }))}
+            onChange={value => setFilters(prev => ({ ...prev, group_by: value }))}
           />
         </Space>
       </div>
@@ -241,12 +248,18 @@ const FacilityAnalyticsSection = () => {
           </Col>
           <Col xs={24} sm={12} xl={8}>
             <Card className="admin-stat-card">
-              <Statistic title="Учреждения с заказами" value={formatNumber(summary?.facilities_with_orders)} />
+              <Statistic
+                title="Учреждения с заказами"
+                value={formatNumber(summary?.facilities_with_orders)}
+              />
             </Card>
           </Col>
           <Col xs={24} sm={12} xl={8}>
             <Card className="admin-stat-card">
-              <Statistic title="Средний чек" value={formatCurrency(summary?.average_order_amount)} />
+              <Statistic
+                title="Средний чек"
+                value={formatCurrency(summary?.average_order_amount)}
+              />
             </Card>
           </Col>
           <Col xs={24} sm={12} xl={8}>
@@ -256,12 +269,12 @@ const FacilityAnalyticsSection = () => {
           </Col>
         </Row>
 
-        <Row gutter={[16, 16]} className="admin-split-grid">
+        <Row gutter={[16, 16]} className="admin-split-grid" style={{ marginTop: 20 }}>
           <Col xs={24} xl={12}>
             <Card className="admin-table-card" title="Расходы по учреждениям">
               {spendingChart.length ? (
                 <div className="admin-chart-list">
-                  {spendingChart.map((item) => (
+                  {spendingChart.map(item => (
                     <div className="admin-chart-row" key={item.facility_id}>
                       <div className="admin-chart-meta">
                         <span>{item.facility_name}</span>
@@ -270,7 +283,9 @@ const FacilityAnalyticsSection = () => {
                       <div className="admin-chart-bar">
                         <div
                           className="admin-chart-bar-fill"
-                          style={{ width: `${getPercent(item.total_amount, maxFacilitySpending)}%` }}
+                          style={{
+                            width: `${getPercent(item.total_amount, maxFacilitySpending)}%`
+                          }}
                         />
                       </div>
                     </div>
@@ -285,7 +300,7 @@ const FacilityAnalyticsSection = () => {
             <Card className="admin-table-card" title="Тренд расходов">
               {trendData.length ? (
                 <div className="admin-chart-list">
-                  {trendData.map((item) => (
+                  {trendData.map(item => (
                     <div className="admin-chart-row" key={item.period}>
                       <div className="admin-chart-meta">
                         <span>{item.period}</span>
@@ -307,7 +322,7 @@ const FacilityAnalyticsSection = () => {
           </Col>
         </Row>
 
-        <Card className="admin-table-card" title="Таблица по учреждениям">
+        <Card className="admin-table-card" title="Таблица по учреждениям" style={{ marginTop: 20 }}>
           <Table
             rowKey="facility_id"
             dataSource={tableData}
@@ -318,32 +333,36 @@ const FacilityAnalyticsSection = () => {
                 title: 'Расходы',
                 dataIndex: 'total_spent',
                 key: 'total_spent',
-                render: (value) => formatCurrency(value)
+                render: value => formatCurrency(value)
               },
               {
                 title: 'Заказов',
                 dataIndex: 'orders_count',
                 key: 'orders_count',
-                render: (value) => formatNumber(value)
+                render: value => formatNumber(value)
               },
               {
                 title: 'Средний чек',
                 dataIndex: 'average_order_amount',
                 key: 'average_order_amount',
-                render: (value) => formatCurrency(value)
+                render: value => formatCurrency(value)
               },
               {
                 title: 'Активные заключённые',
                 dataIndex: 'active_inmates',
                 key: 'active_inmates',
-                render: (value) => formatNumber(value)
+                render: value => formatNumber(value)
               },
               { title: 'Топ товар', dataIndex: 'top_product', key: 'top_product' },
               { title: 'Топ категория', dataIndex: 'top_category', key: 'top_category' },
               {
                 title: 'Детали',
                 key: 'actions',
-                render: (_, record) => <Button type="link" onClick={() => openDrawer(record)}>Открыть</Button>
+                render: (_, record) => (
+                  <Button type="link" onClick={() => openDrawer(record)}>
+                    Открыть
+                  </Button>
+                )
               }
             ]}
           />
@@ -351,19 +370,33 @@ const FacilityAnalyticsSection = () => {
       </Spin>
 
       <Drawer
-        title={selectedFacility ? `Учреждение: ${selectedFacility.facility_name}` : 'Детали учреждения'}
+        title={
+          selectedFacility ? `Учреждение: ${selectedFacility.facility_name}` : 'Детали учреждения'
+        }
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         width={920}
       >
         <Spin spinning={facilityOrdersLoading}>
           <Descriptions bordered column={2} size="small" className="admin-descriptions">
-            <Descriptions.Item label="Учреждение">{facilityDetails?.facility_name || '—'}</Descriptions.Item>
-            <Descriptions.Item label="Расходы">{formatCurrency(facilityDetails?.total_spent)}</Descriptions.Item>
-            <Descriptions.Item label="Заказов">{formatNumber(facilityDetails?.orders_count)}</Descriptions.Item>
-            <Descriptions.Item label="Средний чек">{formatCurrency(facilityDetails?.average_order_amount)}</Descriptions.Item>
-            <Descriptions.Item label="Активные заключённые">{formatNumber(facilityDetails?.active_inmates)}</Descriptions.Item>
-            <Descriptions.Item label="Ожидающие заказы">{formatNumber(facilityDetails?.pending_orders)}</Descriptions.Item>
+            <Descriptions.Item label="Учреждение">
+              {facilityDetails?.facility_name || '—'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Расходы">
+              {formatCurrency(facilityDetails?.total_spent)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Заказов">
+              {formatNumber(facilityDetails?.orders_count)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Средний чек">
+              {formatCurrency(facilityDetails?.average_order_amount)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Активные заключённые">
+              {formatNumber(facilityDetails?.active_inmates)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ожидающие заказы">
+              {formatNumber(facilityDetails?.pending_orders)}
+            </Descriptions.Item>
           </Descriptions>
 
           <Card className="admin-table-card" title="Топ товаров" style={{ marginTop: 16 }}>
@@ -378,13 +411,13 @@ const FacilityAnalyticsSection = () => {
                   title: 'Количество',
                   dataIndex: 'total_quantity',
                   key: 'total_quantity',
-                  render: (value) => formatNumber(value)
+                  render: value => formatNumber(value)
                 },
                 {
                   title: 'Сумма',
                   dataIndex: 'total_amount',
                   key: 'total_amount',
-                  render: (value) => formatCurrency(value)
+                  render: value => formatCurrency(value)
                 }
               ]}
             />
@@ -401,7 +434,7 @@ const FacilityAnalyticsSection = () => {
                   { value: 'APPROVED', label: 'Одобрен' },
                   { value: 'REJECTED', label: 'Отклонён' }
                 ]}
-                onChange={(value) => {
+                onChange={value => {
                   const next = { ...facilityOrdersFilters, status: value, page: 1 };
                   setFacilityOrdersFilters(next);
                   loadFacilityDetails(selectedFacility.facility_id, next);
@@ -415,9 +448,11 @@ const FacilityAnalyticsSection = () => {
               pagination={{
                 current: facilityOrdersFilters.page,
                 pageSize: facilityOrdersFilters.pageSize,
-                total: facilityOrders.length < facilityOrdersFilters.pageSize
-                  ? (facilityOrdersFilters.page - 1) * facilityOrdersFilters.pageSize + facilityOrders.length
-                  : facilityOrdersFilters.page * facilityOrdersFilters.pageSize + 1,
+                total:
+                  facilityOrders.length < facilityOrdersFilters.pageSize
+                    ? (facilityOrdersFilters.page - 1) * facilityOrdersFilters.pageSize +
+                      facilityOrders.length
+                    : facilityOrdersFilters.page * facilityOrdersFilters.pageSize + 1,
                 onChange: (page, pageSize) => {
                   const next = { ...facilityOrdersFilters, page, pageSize };
                   setFacilityOrdersFilters(next);
@@ -430,25 +465,25 @@ const FacilityAnalyticsSection = () => {
                   title: 'Статус',
                   dataIndex: 'status',
                   key: 'status',
-                  render: (value) => <Tag>{formatOrderStatus(value)}</Tag>
+                  render: value => <Tag>{formatOrderStatus(value)}</Tag>
                 },
                 {
                   title: 'Сумма',
                   dataIndex: 'total_amount',
                   key: 'total_amount',
-                  render: (value) => formatCurrency(value)
+                  render: value => formatCurrency(value)
                 },
                 {
                   title: 'Дата',
                   dataIndex: 'created_at',
                   key: 'created_at',
-                  render: (value) => formatDateTime(value)
+                  render: value => formatDateTime(value)
                 }
               ]}
               expandable={{
-                expandedRowRender: (record) => (
+                expandedRowRender: record => (
                   <div className="admin-order-items">
-                    {(record.items || []).map((item) => (
+                    {(record.items || []).map(item => (
                       <div key={item.id} className="admin-order-item-row">
                         <span>{item.product_name}</span>
                         <span>{item.quantity} шт.</span>

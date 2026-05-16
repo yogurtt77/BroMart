@@ -84,9 +84,13 @@ const DashboardSection = () => {
         apiClient.get('/api/v1/admin/dashboard/spending-trend', { params }),
         apiClient.get('/api/v1/admin/dashboard/orders-by-status'),
         apiClient.get('/api/v1/admin/dashboard/top-products', { params: { ...params, limit: 5 } }),
-        apiClient.get('/api/v1/admin/dashboard/top-facilities', { params: { ...params, limit: 5 } }),
+        apiClient.get('/api/v1/admin/dashboard/top-facilities', {
+          params: { ...params, limit: 5 }
+        }),
         apiClient.get('/api/v1/admin/dashboard/recent-orders', { params: { ...params, limit: 5 } }),
-        apiClient.get('/api/v1/admin/dashboard/low-stock-products', { params: { threshold: 10, limit: 5 } })
+        apiClient.get('/api/v1/admin/dashboard/low-stock-products', {
+          params: { threshold: 10, limit: 5 }
+        })
       ]);
 
       setSummary(unwrapResponseData(summaryResponse.data));
@@ -125,8 +129,8 @@ const DashboardSection = () => {
     loadDashboard();
   }, [filters.date_from, filters.date_to, filters.group_by, loadDashboard]);
 
-  const maxTrendAmount = Math.max(...spendingTrend.map((item) => Number(item.total_amount || 0)), 0);
-  const maxStatusCount = Math.max(...ordersByStatus.map((item) => Number(item.count || 0)), 0);
+  const maxTrendAmount = Math.max(...spendingTrend.map(item => Number(item.total_amount || 0)), 0);
+  const maxStatusCount = Math.max(...ordersByStatus.map(item => Number(item.count || 0)), 0);
   const handleResetFilters = () => {
     setFilters(INITIAL_FILTERS);
   };
@@ -135,23 +139,27 @@ const DashboardSection = () => {
     <section className="admin-section">
       <div className="admin-section-header">
         <div>
-          <Title level={3} className="admin-section-title">Панель управления</Title>
-          <Text className="admin-section-note">Сводные показатели, расходы, статусы и оперативная сводка.</Text>
+          <Title level={3} className="admin-section-title">
+            Панель управления
+          </Title>
+          <Text className="admin-section-note">
+            Сводные показатели, расходы, статусы и оперативная сводка.
+          </Text>
         </div>
         <Space wrap className="admin-toolbar">
           <Input
             type="date"
             value={filters.date_from}
-            onChange={(event) => setFilters((prev) => ({ ...prev, date_from: event.target.value }))}
+            onChange={event => setFilters(prev => ({ ...prev, date_from: event.target.value }))}
           />
           <Input
             type="date"
             value={filters.date_to}
-            onChange={(event) => setFilters((prev) => ({ ...prev, date_to: event.target.value }))}
+            onChange={event => setFilters(prev => ({ ...prev, date_to: event.target.value }))}
           />
           <Select
             value={filters.group_by}
-            onChange={(value) => setFilters((prev) => ({ ...prev, group_by: value }))}
+            onChange={value => setFilters(prev => ({ ...prev, group_by: value }))}
             options={GROUP_BY_OPTIONS}
             style={{ width: 170 }}
           />
@@ -165,7 +173,10 @@ const DashboardSection = () => {
         <Row gutter={[16, 16]} className="admin-stats-grid">
           <Col xs={24} sm={12} xl={8}>
             <Card className="admin-stat-card">
-              <Statistic title="Общая сумма заказов" value={formatCurrency(summary?.total_revenue)} />
+              <Statistic
+                title="Общая сумма заказов"
+                value={formatCurrency(summary?.total_revenue)}
+              />
             </Card>
           </Col>
           <Col xs={24} sm={12} xl={8}>
@@ -175,7 +186,10 @@ const DashboardSection = () => {
           </Col>
           <Col xs={24} sm={12} xl={8}>
             <Card className="admin-stat-card">
-              <Statistic title="Активные заключённые" value={formatNumber(summary?.active_inmates)} />
+              <Statistic
+                title="Активные заключённые"
+                value={formatNumber(summary?.active_inmates)}
+              />
             </Card>
           </Col>
           <Col xs={24} sm={12} xl={8}>
@@ -185,17 +199,20 @@ const DashboardSection = () => {
           </Col>
           <Col xs={24} sm={12} xl={8}>
             <Card className="admin-stat-card">
-              <Statistic title="Товары с низким остатком" value={formatNumber(summary?.low_stock_products_count)} />
+              <Statistic
+                title="Товары с низким остатком"
+                value={formatNumber(summary?.low_stock_products_count)}
+              />
             </Card>
           </Col>
         </Row>
 
-        <Row gutter={[16, 16]} className="admin-split-grid">
+        <Row gutter={[16, 16]} className="admin-split-grid" style={{ marginTop: '20px' }}>
           <Col xs={24} xl={14}>
             <Card className="admin-table-card" title="Динамика расходов">
               {spendingTrend.length ? (
                 <div className="admin-chart-list">
-                  {spendingTrend.map((item) => (
+                  {spendingTrend.map(item => (
                     <div className="admin-chart-row" key={item.period}>
                       <div className="admin-chart-meta">
                         <span>{item.period}</span>
@@ -219,7 +236,7 @@ const DashboardSection = () => {
             <Card className="admin-table-card" title="Статусы заказов">
               {ordersByStatus.length ? (
                 <div className="admin-chart-list">
-                  {ordersByStatus.map((item) => (
+                  {ordersByStatus.map(item => (
                     <div className="admin-chart-row" key={item.status}>
                       <div className="admin-chart-meta">
                         <span>{formatOrderStatus(item.status)}</span>
@@ -243,7 +260,7 @@ const DashboardSection = () => {
 
         <Row gutter={[16, 16]}>
           <Col xs={24} xxl={12}>
-            <Card className="admin-table-card" title="Топ товаров">
+            <Card className="admin-table-card" title="Топ товаров" style={{ marginTop: '20px' }}>
               <Table
                 rowKey="product_id"
                 dataSource={topProducts}
@@ -255,20 +272,20 @@ const DashboardSection = () => {
                     title: 'Количество',
                     dataIndex: 'total_quantity',
                     key: 'total_quantity',
-                    render: (value) => formatNumber(value)
+                    render: value => formatNumber(value)
                   },
                   {
                     title: 'Сумма',
                     dataIndex: 'total_amount',
                     key: 'total_amount',
-                    render: (value) => formatCurrency(value)
+                    render: value => formatCurrency(value)
                   }
                 ]}
               />
             </Card>
           </Col>
           <Col xs={24} xxl={12}>
-            <Card className="admin-table-card" title="Топ учреждений">
+            <Card className="admin-table-card" title="Топ учреждений" style={{ marginTop: '20px' }}>
               <Table
                 rowKey="facility_id"
                 dataSource={topFacilities}
@@ -280,13 +297,13 @@ const DashboardSection = () => {
                     title: 'Заказов',
                     dataIndex: 'orders_count',
                     key: 'orders_count',
-                    render: (value) => formatNumber(value)
+                    render: value => formatNumber(value)
                   },
                   {
                     title: 'Сумма',
                     dataIndex: 'total_amount',
                     key: 'total_amount',
-                    render: (value) => formatCurrency(value)
+                    render: value => formatCurrency(value)
                   }
                 ]}
               />
@@ -306,19 +323,19 @@ const DashboardSection = () => {
                     title: 'Сумма',
                     dataIndex: 'total_amount',
                     key: 'total_amount',
-                    render: (value) => formatCurrency(value)
+                    render: value => formatCurrency(value)
                   },
                   {
                     title: 'Статус',
                     dataIndex: 'status',
                     key: 'status',
-                    render: (value) => <Tag>{formatOrderStatus(value)}</Tag>
+                    render: value => <Tag>{formatOrderStatus(value)}</Tag>
                   },
                   {
                     title: 'Дата',
                     dataIndex: 'created_at',
                     key: 'created_at',
-                    render: (value) => formatDateTime(value)
+                    render: value => formatDateTime(value)
                   }
                 ]}
               />
@@ -338,13 +355,13 @@ const DashboardSection = () => {
                     title: 'Остаток',
                     dataIndex: 'stock_quantity',
                     key: 'stock_quantity',
-                    render: (value) => formatNumber(value)
+                    render: value => formatNumber(value)
                   },
                   {
                     title: 'Цена',
                     dataIndex: 'price',
                     key: 'price',
-                    render: (value) => formatCurrency(value)
+                    render: value => formatCurrency(value)
                   }
                 ]}
               />
