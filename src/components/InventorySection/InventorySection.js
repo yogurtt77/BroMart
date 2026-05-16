@@ -353,6 +353,7 @@ const InventorySection = () => {
               <Select
                 allowClear
                 options={categoryOptions}
+                placeholder="Выберите категорию"
                 onChange={(value) => {
                   filterForm.setFieldValue('vendor_id', undefined);
                   loadVendors(value, 'filters');
@@ -360,19 +361,19 @@ const InventorySection = () => {
               />
             </Form.Item>
             <Form.Item label="Учреждение" name="facility_id">
-              <Select allowClear options={facilityOptions} />
+              <Select allowClear options={facilityOptions} placeholder="Выберите учреждение" />
             </Form.Item>
             <Form.Item label="Поставщик" name="vendor_id">
-              <Select allowClear options={vendorOptions} />
+              <Select allowClear options={vendorOptions} placeholder="Выберите поставщика" />
             </Form.Item>
             <Form.Item label="Название" name="name">
               <Input placeholder="Поиск по названию" />
             </Form.Item>
             <Form.Item label="Статус" name="is_active" initialValue="all">
-              <Select options={ACTIVE_OPTIONS} />
+              <Select options={ACTIVE_OPTIONS} placeholder="Выберите статус" />
             </Form.Item>
             <Form.Item label="Сортировка" name="sort" initialValue="desc">
-              <Select options={SORT_OPTIONS} />
+              <Select options={SORT_OPTIONS} placeholder="Выберите сортировку" />
             </Form.Item>
           </div>
           <Space>
@@ -469,6 +470,7 @@ const InventorySection = () => {
             <Form.Item label="Категория" name="category_id" rules={[{ required: true, message: 'Выберите категорию' }]}>
               <Select
                 options={categoryOptions}
+                placeholder="Выберите категорию"
                 onChange={(value) => {
                   productForm.setFieldValue('vendor_id', undefined);
                   loadVendors(value, 'modal');
@@ -476,10 +478,10 @@ const InventorySection = () => {
               />
             </Form.Item>
             <Form.Item label="Учреждение" name="facility_id" rules={[{ required: true, message: 'Выберите учреждение' }]}>
-              <Select options={facilityOptions} />
+              <Select options={facilityOptions} placeholder="Выберите учреждение" />
             </Form.Item>
             <Form.Item label="Поставщик" name="vendor_id" rules={[{ required: true, message: 'Выберите поставщика' }]}>
-              <Select options={modalVendorOptions} />
+              <Select options={modalVendorOptions} placeholder="Выберите поставщика" />
             </Form.Item>
             <Form.Item label="Цена" name="price" rules={[{ required: true, message: 'Введите цену' }]}>
               <InputNumber min={0} style={{ width: '100%' }} />

@@ -324,13 +324,13 @@ const InmatesManagementSection = () => {
         <Form form={filterForm} layout="vertical" onFinish={handleFilterFinish}>
           <div className="admin-filter-grid">
             <Form.Item label="Учреждение" name="facility_id">
-              <Select allowClear options={facilityOptions} />
+              <Select allowClear options={facilityOptions} placeholder="Выберите учреждение" />
             </Form.Item>
             <Form.Item label="Режим" name="security_regime">
-              <Select allowClear options={securityRegimeOptions} />
+              <Select allowClear options={securityRegimeOptions} placeholder="Выберите режим" />
             </Form.Item>
             <Form.Item label="Статус" name="is_active" initialValue="all">
-              <Select options={ACTIVE_OPTIONS} />
+              <Select options={ACTIVE_OPTIONS} placeholder="Выберите статус" />
             </Form.Item>
             <Form.Item label="Поиск" name="search">
               <Input placeholder="ФИО, ИИН, email" />
@@ -427,10 +427,10 @@ const InmatesManagementSection = () => {
               <Input maxLength={12} />
             </Form.Item>
             <Form.Item label="Учреждение" name="facility_id" rules={[{ required: true, message: 'Выберите учреждение' }]}>
-              <Select options={facilityOptions} />
+              <Select options={facilityOptions} placeholder="Выберите учреждение" />
             </Form.Item>
             <Form.Item label="Режим" name="security_regime" rules={[{ required: true, message: 'Выберите режим' }]}>
-              <Select options={securityRegimeOptions} />
+              <Select options={securityRegimeOptions} placeholder="Выберите режим" />
             </Form.Item>
             <Form.Item label="Дата перевода" name="transfer_date" rules={[{ required: true, message: 'Выберите дату перевода' }]}>
               <Input type="date" />
@@ -470,7 +470,7 @@ const InmatesManagementSection = () => {
             <Input />
           </Form.Item>
           <Form.Item label="Учреждение" name="facility_id" rules={[{ required: true, message: 'Выберите учреждение' }]}>
-            <Select options={facilityOptions} />
+            <Select options={facilityOptions} placeholder="Выберите учреждение" />
           </Form.Item>
           <Form.Item label="Активен" name="is_active" valuePropName="checked">
             <Switch />
@@ -489,7 +489,7 @@ const InmatesManagementSection = () => {
       >
         <Form form={settingsForm} layout="vertical" onFinish={handleUpdateSettings}>
           <Form.Item label="Режим" name="security_regime" rules={[{ required: true, message: 'Выберите режим' }]}>
-            <Select options={securityRegimeOptions} />
+            <Select options={securityRegimeOptions} placeholder="Выберите режим" />
           </Form.Item>
           <Form.Item label="Месячный лимит" name="monthly_limit" rules={[{ required: true, message: 'Введите лимит' }]}>
             <InputNumber min={0} style={{ width: '100%' }} />

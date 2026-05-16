@@ -148,11 +148,13 @@ const DashboardSection = () => {
         </div>
         <Space wrap className="admin-toolbar">
           <Input
+            addonBefore="Дата от"
             type="date"
             value={filters.date_from}
             onChange={event => setFilters(prev => ({ ...prev, date_from: event.target.value }))}
           />
           <Input
+            addonBefore="Дата до"
             type="date"
             value={filters.date_to}
             onChange={event => setFilters(prev => ({ ...prev, date_to: event.target.value }))}

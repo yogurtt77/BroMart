@@ -164,10 +164,10 @@ const AuditLogSection = () => {
         <Form form={form} layout="vertical" onFinish={handleFilterFinish}>
           <div className="admin-filter-grid">
             <Form.Item label="ID пользователя" name="actor_user_id">
-              <Input />
+              <Input placeholder="Введите ID пользователя" />
             </Form.Item>
             <Form.Item label="Роль" name="actor_role">
-              <Select allowClear options={ROLE_OPTIONS} />
+              <Select allowClear options={ROLE_OPTIONS} placeholder="Выберите роль" />
             </Form.Item>
             <Form.Item label="Действие" name="action">
               <Input placeholder="Например CREATE_PRODUCT" />
