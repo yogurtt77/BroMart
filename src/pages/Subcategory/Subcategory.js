@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { AppstoreOutlined, BarsOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Alert,
@@ -15,10 +15,11 @@ import {
   Typography
 } from 'antd';
 import apiClient from '../../utils/apiClient';
+import { getUserRole } from '../../utils/auth';
 import { addToCart, changeCartQuantity, getCartItems } from '../../utils/cart';
 import './Subcategory.scss';
 
-const unwrapResponseData = (payload) => payload?.data ?? payload;
+const unwrapResponseData = payload => payload?.data ?? payload;
 
 const { Title, Text } = Typography;
 
@@ -29,9 +30,9 @@ const SORT_OPTIONS = [
   { value: 'name', label: 'По названию' }
 ];
 
-const itemPhoto = (product) => product.image_url;
+const itemPhoto = product => product.image_url;
 
-const sortParams = (sortBy) => {
+const sortParams = sortBy => {
   if (sortBy === 'price-asc') {
     return { sort_by: 'price', sort: 'asc' };
   }
@@ -51,6 +52,7 @@ const Subcategory = () => {
   const { subcategoryId } = useParams();
   const location = useLocation();
   const vendorName = location.state?.vendorName ?? 'Поставщик';
+  const canUseCart = getUserRole() === 'INMATE';
 
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
@@ -121,7 +123,7 @@ const Subcategory = () => {
     return () => controller.abort();
   }, [subcategoryId, sortBy, searchQuery]);
 
-  const handleSortChange = (value) => {
+  const handleSortChange = value => {
     setSortBy(value);
 
     if (value !== 'name') {
@@ -129,7 +131,7 @@ const Subcategory = () => {
     }
   };
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = product => {
     addToCart({
       id: product.id,
       name: product.name,
@@ -138,9 +140,8 @@ const Subcategory = () => {
     });
   };
 
-  const getProductQuantity = (productId) => {
-    const cartItem = cartItems.find((item) => item.id === productId);
-
+  const getProductQuantity = productId => {
+    const cartItem = cartItems.find(item => item.id === productId);
     return cartItem?.quantity || 0;
   };
 
@@ -200,7 +201,7 @@ const Subcategory = () => {
 
           <Spin spinning={loading}>
             <Row gutter={[30, 30]} className={`products-row products-row--${viewMode}`}>
-              {products.map((product) => {
+              {products.map(product => {
                 const quantity = getProductQuantity(product.id);
 
                 return (
@@ -208,11 +209,11 @@ const Subcategory = () => {
                     <Card
                       hoverable
                       className={`product-card ${viewMode === 'list' ? 'product-card--list' : ''}`}
-                      cover={(
+                      cover={
                         <div className="product-cover">
                           <Image src={itemPhoto(product)} alt={product.name} preview={false} />
                         </div>
-                      )}
+                      }
                     >
                       <Title level={5} className="product-name">
                         {product.name}
@@ -223,26 +224,26 @@ const Subcategory = () => {
                           {Number(product.price ?? 0).toFixed(2)} ₸
                         </Text>
 
-                        {quantity > 0 ? (
-                          <Space.Compact block className="product-quantity-control">
-                            <Button
-                              icon={<MinusOutlined />}
-                              onClick={() => changeCartQuantity(product.id, -1)}
-                            />
-                            <Button className="product-quantity-value">
-                              {quantity}
+                        {canUseCart ? (
+                          quantity > 0 ? (
+                            <Space.Compact block className="product-quantity-control">
+                              <Button
+                                icon={<MinusOutlined />}
+                                onClick={() => changeCartQuantity(product.id, -1)}
+                              />
+                              <Button className="product-quantity-value">{quantity}</Button>
+                              <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={() => changeCartQuantity(product.id, 1)}
+                              />
+                            </Space.Compact>
+                          ) : (
+                            <Button type="primary" block onClick={() => handleAddToCart(product)}>
+                              В корзину
                             </Button>
-                            <Button
-                              type="primary"
-                              icon={<PlusOutlined />}
-                              onClick={() => changeCartQuantity(product.id, 1)}
-                            />
-                          </Space.Compact>
-                        ) : (
-                          <Button type="primary" block onClick={() => handleAddToCart(product)}>
-                            В корзину
-                          </Button>
-                        )}
+                          )
+                        ) : null}
                       </div>
                     </Card>
                   </Col>
