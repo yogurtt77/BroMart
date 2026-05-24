@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import FacilityForm from '../../components/FacilityForm/FacilityForm';
 import PrisonAdminsSection from '../../components/PrisonAdminsSection/PrisonAdminsSection';
-import RoleUsersSection from '../../components/RoleUsersSection/RoleUsersSection';
 import InmateWalletsSection from '../../components/InmateWalletsSection/InmateWalletsSection';
 import OrdersSection from '../../components/OrdersSection/OrdersSection';
 import AdminProfileSection from '../../components/AdminProfileSection/AdminProfileSection';
@@ -26,8 +25,7 @@ const ROLE_SECTIONS = {
       { id: 'inmates', label: 'Управление заключёнными' },
       { id: 'monthly-limits', label: 'Месячные лимиты' },
       { id: 'audit-log', label: 'Журнал аудита' },
-      { id: 'prison-admins', label: 'Начальники учреждений' },
-      { id: 'role-users', label: 'Сотрудники по ролям' },
+      { id: 'prison-admins', label: 'Сотрудники' },
       { id: 'facility', label: 'Учреждения' }
     ],
     components: {
@@ -38,7 +36,6 @@ const ROLE_SECTIONS = {
       'monthly-limits': MonthlyLimitsSection,
       'audit-log': AuditLogSection,
       'prison-admins': PrisonAdminsSection,
-      'role-users': RoleUsersSection,
       facility: FacilityForm
     }
   },

@@ -7,6 +7,12 @@
     margin-bottom: 16px;
   }
 
+  .facility-card {
+    border-radius: 12px !important;
+    border: 1px solid #ececec !important;
+    box-shadow: none !important;
+  }
+
   .facility-form-grid {
     margin-bottom: 24px;
   }
@@ -15,7 +21,9 @@
     margin-bottom: 0;
   }
 
-  .facilities-list {
+  .facilities-table-card {
+    margin-top: 24px;
+
     h4 {
       margin-bottom: 16px;
     }

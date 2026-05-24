@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Button,
@@ -73,7 +73,7 @@ const WarehouseOrdersSection = () => {
   const [assigning, setAssigning] = useState(false);
   const didLoadRef = useRef(false);
 
-  const loadData = async (nextFilters = filters) => {
+  const loadData = useCallback(async (nextFilters = filters) => {
     setLoading(true);
     setError('');
 
@@ -113,7 +113,7 @@ const WarehouseOrdersSection = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     if (didLoadRef.current) {
@@ -122,7 +122,7 @@ const WarehouseOrdersSection = () => {
 
     didLoadRef.current = true;
     loadData(INITIAL_FILTERS);
-  }, []);
+  }, [loadData]);
 
   const statusCounters = useMemo(() => (
     STATUS_CARDS.map(card => ({
