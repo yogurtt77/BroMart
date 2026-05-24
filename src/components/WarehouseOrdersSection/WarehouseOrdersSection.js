@@ -233,12 +233,12 @@ const WarehouseOrdersSection = () => {
         {statusCounters.map(card => (
           <Col key={card.key} xs={24} sm={12} xl={8}>
             <Card
-              className={`warehouse-status-card warehouse-status-card--${card.tone} ${filters.status === card.key ? 'warehouse-status-card--active' : ''}`}
+              className={`admin-overview-card admin-overview-card--clickable admin-overview-card--${card.tone} ${filters.status === card.key ? 'admin-overview-card--active' : ''}`}
               onClick={() => handleStatusCardClick(card.key)}
             >
-              <div className="warehouse-status-card__icon">{card.icon}</div>
-              <div className="warehouse-status-card__label">{card.title}</div>
-              <div className="warehouse-status-card__value">{card.count}</div>
+              <div className="admin-overview-card__icon">{card.icon}</div>
+              <div className="admin-overview-card__label">{card.title}</div>
+              <div className="admin-overview-card__value">{card.count}</div>
             </Card>
           </Col>
         ))}

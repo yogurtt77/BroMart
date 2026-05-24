@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { CheckOutlined, EditOutlined, InboxOutlined, StopOutlined } from '@ant-design/icons';
 import {
   Alert,
   Button,
@@ -33,6 +34,19 @@ const SORT_OPTIONS = [
   { value: 'asc', label: 'Сначала старые' }
 ];
 
+const INITIAL_FILTERS = {
+  category_id: undefined,
+  facility_id: undefined,
+  vendor_id: undefined,
+  name: '',
+  is_active: 'all',
+  sort: 'desc',
+  page: 1,
+  pageSize: 10,
+  lowStockOnly: false,
+  threshold: 10
+};
+
 const InventorySection = () => {
   const [filterForm] = Form.useForm();
   const [productForm] = Form.useForm();
@@ -46,18 +60,7 @@ const InventorySection = () => {
   const [saving, setSaving] = useState(false);
   const [stockSaving, setStockSaving] = useState(false);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState({
-    category_id: undefined,
-    facility_id: undefined,
-    vendor_id: undefined,
-    name: '',
-    is_active: 'all',
-    sort: 'desc',
-    page: 1,
-    pageSize: 10,
-    lowStockOnly: false,
-    threshold: 10
-  });
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -100,6 +103,7 @@ const InventorySection = () => {
         params: { category_id: categoryId }
       });
       const list = unwrapResponseData(response.data);
+
       if (target === 'filters') {
         setVendors(list);
       } else {
@@ -159,11 +163,14 @@ const InventorySection = () => {
         const response = await apiClient.get('/api/v1/catalog/products', { params });
         const list = unwrapResponseData(response.data);
         setProducts(list);
-        setPagination((prev) => ({
+        setPagination(prev => ({
           ...prev,
           current: filters.page,
           pageSize: filters.pageSize,
-          total: list.length < filters.pageSize ? (filters.page - 1) * filters.pageSize + list.length : filters.page * filters.pageSize + 1
+          total:
+            list.length < filters.pageSize
+              ? (filters.page - 1) * filters.pageSize + list.length
+              : filters.page * filters.pageSize + 1
         }));
       }
     } catch (requestError) {
@@ -204,8 +211,8 @@ const InventorySection = () => {
     loadProducts();
   }, [filters, loadProducts]);
 
-  const handleFilterFinish = (values) => {
-    setFilters((prev) => ({
+  const handleFilterFinish = values => {
+    setFilters(prev => ({
       ...prev,
       category_id: values.category_id,
       facility_id: values.facility_id,
@@ -220,18 +227,7 @@ const InventorySection = () => {
   const handleResetFilters = () => {
     filterForm.resetFields();
     setVendors([]);
-    setFilters({
-      category_id: undefined,
-      facility_id: undefined,
-      vendor_id: undefined,
-      name: '',
-      is_active: 'all',
-      sort: 'desc',
-      page: 1,
-      pageSize: 10,
-      lowStockOnly: false,
-      threshold: 10
-    });
+    setFilters(INITIAL_FILTERS);
   };
 
   const openCreateModal = () => {
@@ -242,7 +238,7 @@ const InventorySection = () => {
     setProductModalOpen(true);
   };
 
-  const openEditModal = async (record) => {
+  const openEditModal = async record => {
     setEditingProduct(record);
     await loadVendors(record.category_id, 'modal');
     productForm.setFieldsValue({
@@ -259,7 +255,7 @@ const InventorySection = () => {
     setProductModalOpen(true);
   };
 
-  const handleSaveProduct = async (values) => {
+  const handleSaveProduct = async values => {
     setSaving(true);
 
     try {
@@ -279,7 +275,7 @@ const InventorySection = () => {
     }
   };
 
-  const handleDeactivate = async (productId) => {
+  const handleDeactivate = async productId => {
     try {
       const response = await apiClient.delete(`/api/v1/catalog/products/${productId}`);
       message.success(response.data.message);
@@ -289,7 +285,19 @@ const InventorySection = () => {
     }
   };
 
-  const openStockModal = (record) => {
+  const handleActivate = async productId => {
+    try {
+      const response = await apiClient.patch(`/api/v1/catalog/products/${productId}`, {
+        is_active: true
+      });
+      message.success(response.data.message);
+      await loadProducts();
+    } catch (requestError) {
+      message.error(getApiErrorMessage(requestError, 'Не удалось активировать товар'));
+    }
+  };
+
+  const openStockModal = record => {
     setStockProduct(record);
     stockForm.setFieldsValue({
       stock_quantity: record.stock_quantity,
@@ -298,7 +306,7 @@ const InventorySection = () => {
     setStockModalOpen(true);
   };
 
-  const handleUpdateStock = async (values) => {
+  const handleUpdateStock = async values => {
     setStockSaving(true);
 
     try {
@@ -314,30 +322,32 @@ const InventorySection = () => {
     }
   };
 
-  const categoryOptions = categories.map((item) => ({ value: item.id, label: item.name }));
-  const facilityOptions = facilities.map((item) => ({ value: item.id, label: item.name }));
-  const vendorOptions = vendors.map((item) => ({ value: item.id, label: item.name }));
-  const modalVendorOptions = modalVendors.map((item) => ({ value: item.id, label: item.name }));
+  const categoryOptions = categories.map(item => ({ value: item.id, label: item.name }));
+  const facilityOptions = facilities.map(item => ({ value: item.id, label: item.name }));
+  const vendorOptions = vendors.map(item => ({ value: item.id, label: item.name }));
+  const modalVendorOptions = modalVendors.map(item => ({ value: item.id, label: item.name }));
 
   return (
     <section className="admin-section">
       <div className="admin-section-header">
         <div>
           <Title level={3} className="admin-section-title">Управление складом</Title>
-          <Text className="admin-section-note">Список товаров, фильтры, создание, редактирование и обновление остатков.</Text>
+          <Text className="admin-section-note">
+            Список товаров, фильтры, создание, редактирование и обновление остатков.
+          </Text>
         </div>
         <Space wrap>
           <Space>
             <Text>Только низкий остаток</Text>
             <Switch
               checked={filters.lowStockOnly}
-              onChange={(checked) => setFilters((prev) => ({ ...prev, lowStockOnly: checked, page: 1 }))}
+              onChange={checked => setFilters(prev => ({ ...prev, lowStockOnly: checked, page: 1 }))}
             />
           </Space>
           <InputNumber
             min={1}
             value={filters.threshold}
-            onChange={(value) => setFilters((prev) => ({ ...prev, threshold: value || 10 }))}
+            onChange={value => setFilters(prev => ({ ...prev, threshold: value || 10 }))}
             addonBefore="Порог"
           />
           <Button type="primary" onClick={openCreateModal}>Создать товар</Button>
@@ -354,7 +364,7 @@ const InventorySection = () => {
                 allowClear
                 options={categoryOptions}
                 placeholder="Выберите категорию"
-                onChange={(value) => {
+                onChange={value => {
                   filterForm.setFieldValue('vendor_id', undefined);
                   loadVendors(value, 'filters');
                 }}
@@ -389,18 +399,22 @@ const InventorySection = () => {
             rowKey="id"
             dataSource={products}
             locale={{ emptyText: 'Нет товаров' }}
-            pagination={filters.lowStockOnly ? false : {
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              total: pagination.total,
-              onChange: (page, pageSize) => {
-                setFilters((prev) => ({
-                  ...prev,
-                  page,
-                  pageSize
-                }));
-              }
-            }}
+            pagination={
+              filters.lowStockOnly
+                ? false
+                : {
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    total: pagination.total,
+                    onChange: (page, pageSize) => {
+                      setFilters(prev => ({
+                        ...prev,
+                        page,
+                        pageSize
+                      }));
+                    }
+                  }
+            }
             columns={[
               { title: 'Название', dataIndex: 'name', key: 'name' },
               { title: 'Категория', dataIndex: 'category_name', key: 'category_name' },
@@ -410,7 +424,7 @@ const InventorySection = () => {
                 title: 'Цена',
                 dataIndex: 'price',
                 key: 'price',
-                render: (value) => formatCurrency(value)
+                render: value => formatCurrency(value)
               },
               {
                 title: 'Остаток',
@@ -421,29 +435,66 @@ const InventorySection = () => {
                 title: 'Статус',
                 dataIndex: 'is_active',
                 key: 'is_active',
-                render: (value) => <Tag color={value ? 'green' : 'default'}>{value ? 'Активен' : 'Неактивен'}</Tag>
+                render: value => (
+                  <Tag color={value ? 'green' : 'default'}>
+                    {value ? 'Активен' : 'Неактивен'}
+                  </Tag>
+                )
               },
               {
                 title: 'Обновлён',
                 dataIndex: 'updated_at',
                 key: 'updated_at',
-                render: (value) => formatDateTime(value)
+                render: value => formatDateTime(value)
               },
               {
                 title: 'Действия',
                 key: 'actions',
                 render: (_, record) => (
-                  <Space wrap>
-                    <Button type="link" onClick={() => openEditModal(record)}>Редактировать</Button>
-                    <Button type="link" onClick={() => openStockModal(record)}>Остаток</Button>
-                    <Popconfirm
-                      title="Деактивировать товар?"
-                      okText="Да"
-                      cancelText="Нет"
-                      onConfirm={() => handleDeactivate(record.id)}
-                    >
-                      <Button type="link" danger>Деактивировать</Button>
-                    </Popconfirm>
+                  <Space direction="vertical" size={8}>
+                    {record.is_active ? (
+                      <>
+                        <Button
+                          className="admin-action-button admin-action-button--neutral"
+                          icon={<EditOutlined />}
+                          size="small"
+                          onClick={() => openEditModal(record)}
+                        >
+                          Редактировать
+                        </Button>
+                        <Button
+                          className="admin-action-button admin-action-button--primary"
+                          icon={<InboxOutlined />}
+                          size="small"
+                          onClick={() => openStockModal(record)}
+                        >
+                          Остаток
+                        </Button>
+                        <Popconfirm
+                          title="Деактивировать товар?"
+                          okText="Да"
+                          cancelText="Нет"
+                          onConfirm={() => handleDeactivate(record.id)}
+                        >
+                          <Button
+                            className="admin-action-button admin-action-button--danger"
+                            icon={<StopOutlined />}
+                            size="small"
+                          >
+                            Деактивировать
+                          </Button>
+                        </Popconfirm>
+                      </>
+                    ) : (
+                      <Button
+                        className="admin-action-button admin-action-button--success"
+                        icon={<CheckOutlined />}
+                        size="small"
+                        onClick={() => handleActivate(record.id)}
+                      >
+                        Активировать
+                      </Button>
+                    )}
                   </Space>
                 )
               }
@@ -464,29 +515,49 @@ const InventorySection = () => {
       >
         <Form form={productForm} layout="vertical" onFinish={handleSaveProduct}>
           <div className="admin-filter-grid">
-            <Form.Item label="Название" name="name" rules={[{ required: true, message: 'Введите название товара' }]}>
+            <Form.Item
+              label="Название"
+              name="name"
+              rules={[{ required: true, message: 'Введите название товара' }]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item label="Категория" name="category_id" rules={[{ required: true, message: 'Выберите категорию' }]}>
+            <Form.Item
+              label="Категория"
+              name="category_id"
+              rules={[{ required: true, message: 'Выберите категорию' }]}
+            >
               <Select
                 options={categoryOptions}
                 placeholder="Выберите категорию"
-                onChange={(value) => {
+                onChange={value => {
                   productForm.setFieldValue('vendor_id', undefined);
                   loadVendors(value, 'modal');
                 }}
               />
             </Form.Item>
-            <Form.Item label="Учреждение" name="facility_id" rules={[{ required: true, message: 'Выберите учреждение' }]}>
+            <Form.Item
+              label="Учреждение"
+              name="facility_id"
+              rules={[{ required: true, message: 'Выберите учреждение' }]}
+            >
               <Select options={facilityOptions} placeholder="Выберите учреждение" />
             </Form.Item>
-            <Form.Item label="Поставщик" name="vendor_id" rules={[{ required: true, message: 'Выберите поставщика' }]}>
+            <Form.Item
+              label="Поставщик"
+              name="vendor_id"
+              rules={[{ required: true, message: 'Выберите поставщика' }]}
+            >
               <Select options={modalVendorOptions} placeholder="Выберите поставщика" />
             </Form.Item>
             <Form.Item label="Цена" name="price" rules={[{ required: true, message: 'Введите цену' }]}>
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
-            <Form.Item label="Остаток" name="stock_quantity" rules={[{ required: true, message: 'Введите остаток' }]}>
+            <Form.Item
+              label="Остаток"
+              name="stock_quantity"
+              rules={[{ required: true, message: 'Введите остаток' }]}
+            >
               <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item label="Ссылка на изображение" name="image_url">
@@ -496,7 +567,11 @@ const InventorySection = () => {
               <Switch />
             </Form.Item>
           </div>
-          <Form.Item label="Описание" name="description" rules={[{ required: true, message: 'Введите описание' }]}>
+          <Form.Item
+            label="Описание"
+            name="description"
+            rules={[{ required: true, message: 'Введите описание' }]}
+          >
             <Input.TextArea rows={4} />
           </Form.Item>
         </Form>
