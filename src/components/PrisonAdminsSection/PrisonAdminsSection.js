@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Card, Col, Form, Input, Row, Select, Spin, Table, Tag, Typography, message } from 'antd';
+import { Alert, Button, Col, Form, Input, Modal, Row, Select, Spin, Table, Tag, Typography, message } from 'antd';
 import apiClient from '../../utils/apiClient';
 import { formatDateTime, formatRole, getApiErrorMessage, unwrapResponseData } from '../../utils/admin';
 import './PrisonAdminsSection.scss';
@@ -25,6 +25,7 @@ const PrisonAdminsSection = () => {
   const [facilities, setFacilities] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState('');
   const didLoadRef = useRef(false);
 
@@ -79,6 +80,7 @@ const PrisonAdminsSection = () => {
       });
       message.success(response.data.message);
       form.resetFields();
+      setModalOpen(false);
       await loadInitialData();
     } catch (requestError) {
       const nextError = getApiErrorMessage(requestError, 'Не удалось создать сотрудника');
@@ -96,94 +98,17 @@ const PrisonAdminsSection = () => {
 
   return (
     <section className="prison-admins-section">
-      <Title level={3} className="prison-admins-title">Сотрудники</Title>
+      <div className="prison-admins-header">
+        <Title level={3} className="prison-admins-title">Сотрудники</Title>
+        <Button type="primary" onClick={() => setModalOpen(true)}>
+          Создать
+        </Button>
+      </div>
 
       {error ? <Alert type="error" message={error} showIcon className="prison-admins-alert" /> : null}
 
       <Spin spinning={fetching}>
-        <Card className="prison-admins-card">
-          <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <Row gutter={16}>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label="Роль"
-                  name="role"
-                  rules={[{ required: true, message: 'Выберите роль' }]}
-                >
-                  <Select options={ROLE_OPTIONS} placeholder="Выберите роль" />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label="ФИО"
-                  name="full_name"
-                  rules={[{ required: true, message: 'Введите ФИО' }]}
-                >
-                  <Input placeholder="Введите ФИО" />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label="Email"
-                  name="email"
-                  rules={[
-                    { required: true, message: 'Введите email' },
-                    { type: 'email', message: 'Некорректный email' }
-                  ]}
-                >
-                  <Input placeholder="user@example.com" />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-            <Form.Item
-              label="ИИН"
-              name="iin"
-              rules={[
-                { required: true, message: 'Введите ИИН' },
-                { pattern: /^\d{1,12}$/, message: 'Только цифры, не более 12' }
-              ]}
-            >
-              <Input placeholder="Введите ИИН" maxLength={12} />
-            </Form.Item>
-          </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label="Учреждение"
-                  name="facility_id"
-                  rules={[{ required: true, message: 'Выберите учреждение' }]}
-                >
-                  <Select options={facilityOptions} placeholder="Выберите учреждение" />
-                </Form.Item>
-              </Col>
-
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label="Пароль"
-                  name="password"
-                  rules={[
-                    { required: true, message: 'Введите пароль' },
-                    { min: 8, message: 'Минимум 8 символов' }
-                  ]}
-                >
-                  <Input.Password placeholder="Введите пароль" />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Form.Item className="prison-admins-submit-wrap">
-              <Button type="primary" htmlType="submit" loading={loading}>
-                Создать сотрудника
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
-
-        <Card className="prison-admins-card prison-admins-table-card">
-          <Title level={4}>Список сотрудников</Title>
+        <div className="prison-admins-table-card">
           <Table
             rowKey="id"
             dataSource={employees}
@@ -219,8 +144,93 @@ const PrisonAdminsSection = () => {
               }
             ]}
           />
-        </Card>
+        </div>
       </Spin>
+
+      <Modal
+        title="Создать сотрудника"
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={() => form.submit()}
+        okText="Создать сотрудника"
+        cancelText="Отмена"
+        confirmLoading={loading}
+        destroyOnClose
+        width={760}
+      >
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Роль"
+                name="role"
+                rules={[{ required: true, message: 'Выберите роль' }]}
+              >
+                <Select options={ROLE_OPTIONS} placeholder="Выберите роль" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="ФИО"
+                name="full_name"
+                rules={[{ required: true, message: 'Введите ФИО' }]}
+              >
+                <Input placeholder="Введите ФИО" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  { required: true, message: 'Введите email' },
+                  { type: 'email', message: 'Некорректный email' }
+                ]}
+              >
+                <Input placeholder="user@example.com" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="ИИН"
+                name="iin"
+                rules={[
+                  { required: true, message: 'Введите ИИН' },
+                  { pattern: /^\d{1,12}$/, message: 'Только цифры, не более 12' }
+                ]}
+              >
+                <Input placeholder="Введите ИИН" maxLength={12} />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Учреждение"
+                name="facility_id"
+                rules={[{ required: true, message: 'Выберите учреждение' }]}
+              >
+                <Select options={facilityOptions} placeholder="Выберите учреждение" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Пароль"
+                name="password"
+                rules={[
+                  { required: true, message: 'Введите пароль' },
+                  { min: 8, message: 'Минимум 8 символов' }
+                ]}
+              >
+                <Input.Password placeholder="Введите пароль" />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Modal>
     </section>
   );
 };

@@ -13,6 +13,12 @@ export const SECURITY_REGIME_LABELS = {
   MAXIMUM: 'Максимальный режим'
 };
 
+export const SECURITY_REGIME_COLORS = {
+  GENERAL: 'green',
+  STRICT: 'gold',
+  MAXIMUM: 'red'
+};
+
 export { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS };
 
 export const ROLE_LABELS = {
@@ -76,6 +82,8 @@ export const getPercent = (value, maxValue) => {
 export const getApiErrorMessage = (error, fallback) => error?.response?.data?.message || fallback;
 
 export const formatSecurityRegime = value => SECURITY_REGIME_LABELS[value] || value || '—';
+
+export const getSecurityRegimeColor = value => SECURITY_REGIME_COLORS[value] || 'default';
 
 export const formatOrderStatus = value => formatMappedOrderStatus(value);
 

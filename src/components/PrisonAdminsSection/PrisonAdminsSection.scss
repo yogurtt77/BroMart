@@ -1,25 +1,22 @@
 .prison-admins-section {
-  .prison-admins-title {
+  .prison-admins-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .prison-admins-title {
+    margin-bottom: 0 !important;
   }
 
   .prison-admins-alert {
     margin-bottom: 16px;
   }
 
-  .prison-admins-card {
-    border-radius: 12px !important;
-    border: 1px solid #ececec !important;
-    box-shadow: none !important;
-  }
-
-  .prison-admins-submit-wrap {
-    margin-bottom: 0;
-  }
-
   .prison-admins-table-card {
-    margin-top: 24px;
-
     h4 {
       margin-bottom: 16px;
     }

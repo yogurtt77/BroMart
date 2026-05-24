@@ -5,6 +5,7 @@ import {
   formatCurrency,
   formatSecurityRegime,
   getApiErrorMessage,
+  getSecurityRegimeColor,
   unwrapResponseData
 } from '../../utils/admin';
 
@@ -42,7 +43,7 @@ const MonthlyLimitsSection = () => {
     loadLimits();
   }, []);
 
-  const openEditModal = (record) => {
+  const openEditModal = record => {
     setEditingLimit(record);
     form.setFieldsValue({
       security_regime: record.security_regime,
@@ -50,7 +51,7 @@ const MonthlyLimitsSection = () => {
     });
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async values => {
     setSaving(true);
 
     try {
@@ -78,7 +79,7 @@ const MonthlyLimitsSection = () => {
         </div>
       </div>
 
-      {error && <Alert type="error" message={error} showIcon className="admin-alert" />}
+      {error ? <Alert type="error" message={error} showIcon className="admin-alert" /> : null}
 
       <Spin spinning={loading}>
         <Card className="admin-table-card">
@@ -92,13 +93,17 @@ const MonthlyLimitsSection = () => {
                 title: 'Режим',
                 dataIndex: 'security_regime',
                 key: 'security_regime',
-                render: (value) => <Tag color="blue">{formatSecurityRegime(value)}</Tag>
+                render: value => (
+                  <Tag color={getSecurityRegimeColor(value)}>
+                    {formatSecurityRegime(value)}
+                  </Tag>
+                )
               },
               {
                 title: 'Лимит',
                 dataIndex: 'monthly_limit',
                 key: 'monthly_limit',
-                render: (value) => formatCurrency(value)
+                render: value => formatCurrency(value)
               },
               {
                 title: 'Действие',
@@ -126,7 +131,9 @@ const MonthlyLimitsSection = () => {
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item label="Режим">
             <Space>
-              <Tag color="blue">{formatSecurityRegime(editingLimit?.security_regime)}</Tag>
+              <Tag color={getSecurityRegimeColor(editingLimit?.security_regime)}>
+                {formatSecurityRegime(editingLimit?.security_regime)}
+              </Tag>
             </Space>
           </Form.Item>
           <Form.Item

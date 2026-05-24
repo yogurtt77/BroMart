@@ -1,29 +1,22 @@
 .facility-form {
-  .facility-title {
+  .facility-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .facility-title {
+    margin-bottom: 0 !important;
   }
 
   .facility-alert {
     margin-bottom: 16px;
   }
 
-  .facility-card {
-    border-radius: 12px !important;
-    border: 1px solid #ececec !important;
-    box-shadow: none !important;
-  }
-
-  .facility-form-grid {
-    margin-bottom: 24px;
-  }
-
-  .facility-submit-wrap {
-    margin-bottom: 0;
-  }
-
   .facilities-table-card {
-    margin-top: 24px;
-
     h4 {
       margin-bottom: 16px;
     }
