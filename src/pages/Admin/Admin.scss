@@ -106,6 +106,7 @@
     }
 
     .admin-stat-card,
+    .admin-overview-card,
     .admin-table-card {
       border-radius: 12px !important;
       border: 1px solid #ececec !important;
@@ -114,6 +115,73 @@
 
     .admin-stat-card {
       background: linear-gradient(180deg, #ffffff 0%, #f8fbf8 100%) !important;
+    }
+
+    .admin-overview-card {
+      position: relative;
+      border-radius: 16px !important;
+      border: 1px solid #e9efe9 !important;
+      background: #fff !important;
+      box-shadow: none !important;
+
+      .ant-card-body {
+        padding: 20px 22px !important;
+      }
+    }
+
+    .admin-overview-card__icon {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 16px;
+    }
+
+    .admin-overview-card__label {
+      font-size: 13px;
+      color: #5f6b62;
+      margin-bottom: 8px;
+    }
+
+    .admin-overview-card__value {
+      font-size: 28px;
+      line-height: 1.1;
+      font-weight: 700;
+      color: #243127;
+      word-break: break-word;
+    }
+
+    .admin-overview-card--green .admin-overview-card__icon {
+      color: #2f8f47;
+      background: #ebf8ef;
+    }
+
+    .admin-overview-card--blue .admin-overview-card__icon {
+      color: #2869d3;
+      background: #edf4ff;
+    }
+
+    .admin-overview-card--gold .admin-overview-card__icon {
+      color: #c69114;
+      background: #fff8e8;
+    }
+
+    .admin-overview-card--orange .admin-overview-card__icon {
+      color: #c77724;
+      background: #fff3e8;
+    }
+
+    .admin-overview-card--red .admin-overview-card__icon {
+      color: #d24f4f;
+      background: #fff0f0;
+    }
+
+    .admin-overview-card--purple .admin-overview-card__icon {
+      color: #9b59b6;
+      background: #f6edff;
     }
 
     .admin-table-card {

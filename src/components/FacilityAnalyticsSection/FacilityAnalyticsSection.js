@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  BankOutlined,
+  BarChartOutlined,
+  TrophyOutlined,
+  WalletOutlined
+} from '@ant-design/icons';
+import {
   Alert,
   Button,
   Card,
@@ -12,7 +18,6 @@ import {
   Select,
   Space,
   Spin,
-  Statistic,
   Table,
   Tag,
   Typography
@@ -35,6 +40,37 @@ const GROUP_BY_OPTIONS = [
   { value: 'day', label: 'По дням' },
   { value: 'week', label: 'По неделям' },
   { value: 'month', label: 'По месяцам' }
+];
+
+const SUMMARY_CARDS = [
+  {
+    key: 'total_spent',
+    title: 'Общие расходы',
+    colorClass: 'admin-overview-card--green',
+    icon: <WalletOutlined />,
+    getValue: summary => formatCurrency(summary?.total_spent)
+  },
+  {
+    key: 'facilities_with_orders',
+    title: 'Учреждения с заказами',
+    colorClass: 'admin-overview-card--blue',
+    icon: <BankOutlined />,
+    getValue: summary => formatNumber(summary?.facilities_with_orders)
+  },
+  {
+    key: 'average_order_amount',
+    title: 'Средний чек',
+    colorClass: 'admin-overview-card--gold',
+    icon: <BarChartOutlined />,
+    getValue: summary => formatCurrency(summary?.average_order_amount)
+  },
+  {
+    key: 'top_facility_name',
+    title: 'Топ учреждение',
+    colorClass: 'admin-overview-card--purple',
+    icon: <TrophyOutlined />,
+    getValue: summary => summary?.top_facility_name || '—'
+  }
 ];
 
 const FacilityAnalyticsSection = () => {
@@ -244,32 +280,15 @@ const FacilityAnalyticsSection = () => {
 
       <Spin spinning={loading}>
         <Row gutter={[16, 16]} className="admin-stats-grid">
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic title="Общие расходы" value={formatCurrency(summary?.total_spent)} />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic
-                title="Учреждения с заказами"
-                value={formatNumber(summary?.facilities_with_orders)}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic
-                title="Средний чек"
-                value={formatCurrency(summary?.average_order_amount)}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic title="Топ учреждение" value={summary?.top_facility_name || '—'} />
-            </Card>
-          </Col>
+          {SUMMARY_CARDS.map(item => (
+            <Col xs={24} sm={12} xl={6} key={item.key}>
+              <Card className={`admin-overview-card ${item.colorClass}`}>
+                <span className="admin-overview-card__icon">{item.icon}</span>
+                <div className="admin-overview-card__label">{item.title}</div>
+                <div className="admin-overview-card__value">{item.getValue(summary)}</div>
+              </Card>
+            </Col>
+          ))}
         </Row>
 
         <Row gutter={[16, 16]} className="admin-split-grid" style={{ marginTop: 20 }}>

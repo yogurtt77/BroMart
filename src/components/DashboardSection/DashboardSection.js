@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ClockCircleOutlined,
+  DollarCircleOutlined,
+  InboxOutlined,
+  ShoppingCartOutlined,
+  TeamOutlined
+} from '@ant-design/icons';
+import {
   Alert,
   Button,
   Card,
@@ -10,7 +17,6 @@ import {
   Select,
   Space,
   Spin,
-  Statistic,
   Table,
   Tag,
   Typography
@@ -39,6 +45,44 @@ const INITIAL_FILTERS = {
   date_to: '',
   group_by: 'day'
 };
+
+const SUMMARY_CARDS = [
+  {
+    key: 'total_revenue',
+    title: 'Общая сумма заказов',
+    colorClass: 'admin-overview-card--green',
+    icon: <DollarCircleOutlined />,
+    getValue: summary => formatCurrency(summary?.total_revenue)
+  },
+  {
+    key: 'orders_count',
+    title: 'Количество заказов',
+    colorClass: 'admin-overview-card--blue',
+    icon: <ShoppingCartOutlined />,
+    getValue: summary => formatNumber(summary?.orders_count)
+  },
+  {
+    key: 'active_inmates',
+    title: 'Активные заключённые',
+    colorClass: 'admin-overview-card--gold',
+    icon: <TeamOutlined />,
+    getValue: summary => formatNumber(summary?.active_inmates)
+  },
+  {
+    key: 'pending_orders',
+    title: 'Ожидающие заказы',
+    colorClass: 'admin-overview-card--orange',
+    icon: <ClockCircleOutlined />,
+    getValue: summary => formatNumber(summary?.pending_orders)
+  },
+  {
+    key: 'low_stock_products_count',
+    title: 'Товары с низким остатком',
+    colorClass: 'admin-overview-card--red',
+    icon: <InboxOutlined />,
+    getValue: summary => formatNumber(summary?.low_stock_products_count)
+  }
+];
 
 const DashboardSection = () => {
   const [filters, setFilters] = useState(INITIAL_FILTERS);
@@ -131,6 +175,7 @@ const DashboardSection = () => {
 
   const maxTrendAmount = Math.max(...spendingTrend.map(item => Number(item.total_amount || 0)), 0);
   const maxStatusCount = Math.max(...ordersByStatus.map(item => Number(item.count || 0)), 0);
+
   const handleResetFilters = () => {
     setFilters(INITIAL_FILTERS);
   };
@@ -173,40 +218,15 @@ const DashboardSection = () => {
 
       <Spin spinning={loading}>
         <Row gutter={[16, 16]} className="admin-stats-grid">
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic
-                title="Общая сумма заказов"
-                value={formatCurrency(summary?.total_revenue)}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic title="Количество заказов" value={formatNumber(summary?.orders_count)} />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic
-                title="Активные заключённые"
-                value={formatNumber(summary?.active_inmates)}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic title="Ожидающие заказы" value={formatNumber(summary?.pending_orders)} />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} xl={8}>
-            <Card className="admin-stat-card">
-              <Statistic
-                title="Товары с низким остатком"
-                value={formatNumber(summary?.low_stock_products_count)}
-              />
-            </Card>
-          </Col>
+          {SUMMARY_CARDS.map(item => (
+            <Col xs={24} sm={12} xl={6} key={item.key}>
+              <Card className={`admin-overview-card ${item.colorClass}`}>
+                <span className="admin-overview-card__icon">{item.icon}</span>
+                <div className="admin-overview-card__label">{item.title}</div>
+                <div className="admin-overview-card__value">{item.getValue(summary)}</div>
+              </Card>
+            </Col>
+          ))}
         </Row>
 
         <Row gutter={[16, 16]} className="admin-split-grid" style={{ marginTop: '20px' }}>
