@@ -1,0 +1,139 @@
+.warehouse-orders-section {
+  .warehouse-orders-section__header {
+    margin-bottom: 4px;
+  }
+
+  .warehouse-orders-section__stats {
+    margin-bottom: 0 !important;
+  }
+
+  .warehouse-status-card {
+    position: relative;
+    border-radius: 16px !important;
+    border: 1px solid #e9efe9 !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+
+    .ant-card-body {
+      padding: 20px 22px !important;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      border-color: #c8d8cb !important;
+      box-shadow: 0 10px 30px rgba(61, 109, 79, 0.08) !important;
+    }
+  }
+
+  .warehouse-status-card--active {
+    border-color: #3d6d4f !important;
+    box-shadow: 0 12px 32px rgba(61, 109, 79, 0.14) !important;
+  }
+
+  .warehouse-status-card__icon {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    font-size: 16px;
+  }
+
+  .warehouse-status-card__label {
+    font-size: 14px;
+    color: #5f6b62;
+    margin-bottom: 8px;
+  }
+
+  .warehouse-status-card__value {
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 700;
+    color: #243127;
+  }
+
+  .warehouse-status-card--orange .warehouse-status-card__icon {
+    color: #c77724;
+    background: #fff3e8;
+  }
+
+  .warehouse-status-card--green .warehouse-status-card__icon {
+    color: #2f8f47;
+    background: #ebf8ef;
+  }
+
+  .warehouse-status-card--gold .warehouse-status-card__icon {
+    color: #c69114;
+    background: #fff8e8;
+  }
+
+  .warehouse-status-card--cyan .warehouse-status-card__icon {
+    color: #0e9fb3;
+    background: #e7fbff;
+  }
+
+  .warehouse-status-card--red .warehouse-status-card__icon {
+    color: #d24f4f;
+    background: #fff0f0;
+  }
+
+  .warehouse-status-card--blue .warehouse-status-card__icon {
+    color: #2869d3;
+    background: #edf4ff;
+  }
+
+   .warehouse-orders-filters-grid--compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .warehouse-orders-section__filters,
+  .warehouse-orders-section__table-card {
+    border-radius: 16px !important;
+  }
+
+  .warehouse-orders-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 16px;
+  }
+
+  .warehouse-orders-section__filter-actions {
+    margin-top: 4px;
+  }
+
+  .warehouse-orders-expanded {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .warehouse-orders-expanded__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+  }
+
+  .ant-table-thead > tr > th {
+    background: #f4fbf4 !important;
+    color: #324035;
+    font-weight: 600;
+  }
+
+  @media (max-width: 1200px) {
+    .warehouse-orders-filters-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .warehouse-orders-filters-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

@@ -6,59 +6,110 @@ import {
   Col,
   Empty,
   Form,
+  Input,
   Modal,
   Row,
   Select,
   Space,
-  Spin,
+  Table,
   Tag,
   Typography,
   message
 } from 'antd';
+import {
+  CarOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  InboxOutlined,
+  ToolOutlined
+} from '@ant-design/icons';
 import apiClient from '../../utils/apiClient';
 import { formatCurrency, formatDateTime, getApiErrorMessage, unwrapResponseData } from '../../utils/admin';
 import { formatOrderStatus, getOrderStatusColor } from '../../utils/orderStatus';
+import './WarehouseOrdersSection.scss';
 
 const { Title, Text } = Typography;
 
 const FILTER_OPTIONS = [
+  { value: 'PENDING', label: 'Ожидает одобрения' },
   { value: 'APPROVED', label: 'Одобрен' },
   { value: 'PACKING', label: 'В сборке' },
   { value: 'READY_FOR_SHIPMENT', label: 'Готов к отправке' },
-  { value: 'FAILED_DELIVERY', label: 'Проблема с доставкой' }
+  { value: 'OUT_FOR_DELIVERY', label: 'В пути' },
+  { value: 'ARRIVED_AT_FACILITY', label: 'Прибыл в учреждение' },
+  { value: 'DELIVERED', label: 'Доставлен' },
+  { value: 'FAILED_DELIVERY', label: 'Проблема с доставкой' },
+  { value: 'REJECTED', label: 'Отклонён' },
+  { value: 'CANCELLED', label: 'Отменён' }
 ];
+
+const STATUS_CARDS = [
+  { key: 'PENDING', title: 'Ожидают', icon: <ClockCircleOutlined />, tone: 'orange' },
+  { key: 'APPROVED', title: 'Одобрены', icon: <InboxOutlined />, tone: 'green' },
+  { key: 'PACKING', title: 'Собираются', icon: <ToolOutlined />, tone: 'gold' },
+  { key: 'READY_FOR_SHIPMENT', title: 'Готовы к отправке', icon: <CarOutlined />, tone: 'cyan' },
+  { key: 'FAILED_DELIVERY', title: 'Проблемные', icon: <CloseCircleOutlined />, tone: 'red' },
+  { key: 'DELIVERED', title: 'Доставлены', icon: <CheckCircleOutlined />, tone: 'blue' }
+];
+
+const INITIAL_FILTERS = {
+  full_name: '',
+  status: undefined,
+  facility_id: undefined
+};
 
 const WarehouseOrdersSection = () => {
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
   const [orders, setOrders] = useState([]);
   const [couriers, setCouriers] = useState([]);
+  const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState(undefined);
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [assignOrder, setAssignOrder] = useState(null);
   const [assigning, setAssigning] = useState(false);
   const didLoadRef = useRef(false);
 
-  const loadData = async () => {
+  const loadData = async (nextFilters = filters) => {
     setLoading(true);
     setError('');
 
+    const params = {};
+
+    if (nextFilters.status) {
+      params.status = nextFilters.status;
+    }
+
+    if (nextFilters.full_name) {
+      params.full_name = nextFilters.full_name;
+    }
+
+    if (nextFilters.facility_id) {
+      params.facility_id = nextFilters.facility_id;
+    }
+
     try {
-      const [ordersResponse, couriersResponse] = await Promise.all([
-        apiClient.get('/api/v1/orders'),
-        apiClient.get('/api/v1/users', { params: { role: 'COURIER' } })
+      const [ordersResponse, couriersResponse, facilitiesResponse] = await Promise.all([
+        apiClient.get('/api/v1/orders', { params }),
+        apiClient.get('/api/v1/users', { params: { role: 'COURIER' } }),
+        apiClient.get('/api/v1/facilities')
       ]);
 
       const ordersList = unwrapResponseData(ordersResponse.data);
       const couriersList = unwrapResponseData(couriersResponse.data);
+      const facilitiesList = unwrapResponseData(facilitiesResponse.data);
 
       setOrders(Array.isArray(ordersList) ? ordersList : []);
       setCouriers(Array.isArray(couriersList) ? couriersList : []);
+      setFacilities(Array.isArray(facilitiesList) ? facilitiesList : []);
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, 'Не удалось загрузить складские заказы'));
       setOrders([]);
       setCouriers([]);
+      setFacilities([]);
     } finally {
       setLoading(false);
     }
@@ -70,17 +121,24 @@ const WarehouseOrdersSection = () => {
     }
 
     didLoadRef.current = true;
-    loadData();
+    loadData(INITIAL_FILTERS);
   }, []);
 
-  const filteredOrders = useMemo(() => (
-    orders
-      .filter(order => (statusFilter ? order.status === statusFilter : true))
-  ), [orders, statusFilter]);
+  const statusCounters = useMemo(() => (
+    STATUS_CARDS.map(card => ({
+      ...card,
+      count: orders.filter(order => order.status === card.key).length
+    }))
+  ), [orders]);
 
   const courierOptions = couriers.map(courier => ({
     value: courier.id,
     label: courier.full_name
+  }));
+
+  const facilityOptions = facilities.map(facility => ({
+    value: facility.id,
+    label: facility.name
   }));
 
   const handleStartPacking = async orderId => {
@@ -90,7 +148,7 @@ const WarehouseOrdersSection = () => {
     try {
       const response = await apiClient.post(`/api/v1/orders/${orderId}/start-packing`);
       message.success(response.data.message);
-      await loadData();
+      await loadData(filters);
     } catch (requestError) {
       const nextError = getApiErrorMessage(requestError, 'Не удалось взять заказ в сборку');
       message.error(nextError);
@@ -120,7 +178,7 @@ const WarehouseOrdersSection = () => {
       message.success(response.data.message);
       setAssignOrder(null);
       form.resetFields();
-      await loadData();
+      await loadData(filters);
     } catch (requestError) {
       const nextError = getApiErrorMessage(requestError, 'Не удалось назначить курьера');
       message.error(nextError);
@@ -130,88 +188,180 @@ const WarehouseOrdersSection = () => {
     }
   };
 
+  const handleFilterFinish = values => {
+    const nextFilters = {
+      full_name: values.full_name || '',
+      status: values.status,
+      facility_id: values.facility_id
+    };
+
+    setFilters(nextFilters);
+    loadData(nextFilters);
+  };
+
+  const handleResetFilters = () => {
+    filterForm.resetFields();
+    setFilters(INITIAL_FILTERS);
+    loadData(INITIAL_FILTERS);
+  };
+
+  const handleStatusCardClick = status => {
+    const nextFilters = {
+      ...filters,
+      status
+    };
+
+    filterForm.setFieldsValue({ status });
+    setFilters(nextFilters);
+    loadData(nextFilters);
+  };
+
   return (
-    <section className="admin-section">
-      <div className="admin-section-header">
+    <section className="admin-section warehouse-orders-section">
+      <div className="admin-section-header warehouse-orders-section__header">
         <div>
           <Title level={3} className="admin-section-title">Заказы склада</Title>
-          <Text className="admin-section-note">Заказы для сборки, назначения курьера и контроля проблемных доставок.</Text>
+          <Text className="admin-section-note">
+            Сводка по статусам, быстрые фильтры и список заказов для работы склада.
+          </Text>
         </div>
       </div>
 
       {error ? <Alert type="error" message={error} showIcon className="admin-alert" /> : null}
 
-      <Card className="admin-table-card">
-        <Space wrap className="admin-toolbar">
-          <Select
-            allowClear
-            value={statusFilter}
-            options={FILTER_OPTIONS}
-            placeholder="Фильтр по статусу"
-            style={{ minWidth: 260 }}
-            onChange={setStatusFilter}
-          />
-          <Button onClick={() => setStatusFilter(undefined)}>Сбросить</Button>
-        </Space>
+      <Row gutter={[16, 16]} className="warehouse-orders-section__stats">
+        {statusCounters.map(card => (
+          <Col key={card.key} xs={24} sm={12} xl={8}>
+            <Card
+              className={`warehouse-status-card warehouse-status-card--${card.tone} ${filters.status === card.key ? 'warehouse-status-card--active' : ''}`}
+              onClick={() => handleStatusCardClick(card.key)}
+            >
+              <div className="warehouse-status-card__icon">{card.icon}</div>
+              <div className="warehouse-status-card__label">{card.title}</div>
+              <div className="warehouse-status-card__value">{card.count}</div>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Card className="admin-table-card warehouse-orders-section__filters">
+        <Form form={filterForm} layout="vertical" onFinish={handleFilterFinish}>
+          <div className="warehouse-orders-filters-grid warehouse-orders-filters-grid--compact">
+            <Form.Item label="ФИО" name="full_name">
+              <Input placeholder="Введите ФИО" />
+            </Form.Item>
+            <Form.Item label="Статус" name="status">
+              <Select allowClear options={FILTER_OPTIONS} placeholder="Выберите статус" />
+            </Form.Item>
+            <Form.Item label="Учреждение" name="facility_id">
+              <Select allowClear options={facilityOptions} placeholder="Выберите учреждение" />
+            </Form.Item>
+          </div>
+          <Space wrap className="warehouse-orders-section__filter-actions">
+            <Button type="primary" htmlType="submit">Применить</Button>
+            <Button onClick={handleResetFilters}>Сбросить</Button>
+          </Space>
+        </Form>
       </Card>
 
-      <Spin spinning={loading}>
-        {!filteredOrders.length ? (
-          <Card className="admin-table-card">
-            <Empty description="Заказов нет" />
-          </Card>
+      <Card className="admin-table-card warehouse-orders-section__table-card">
+        {loading ? null : !orders.length ? (
+          <Empty description="Заказов нет" />
         ) : (
-          <Row gutter={[16, 16]}>
-            {filteredOrders.map(order => (
-              <Col key={order.id} xs={24} xl={12}>
-                <Card className="admin-card">
-                  <Space direction="vertical" size={10} style={{ width: '100%' }}>
-                    <Space wrap>
-                      <Tag color={getOrderStatusColor(order.status)}>{formatOrderStatus(order.status)}</Tag>
-                      {order.courier_name ? <Tag color="blue">Курьер: {order.courier_name}</Tag> : null}
-                    </Space>
-                    <Text strong>{order.user_full_name}</Text>
-                    <Text type="secondary">Учреждение: {order.facility_name || '—'}</Text>
-                    <Text>Сумма: {formatCurrency(order.total_amount)}</Text>
-                    <Text type="secondary">Дата: {formatDateTime(order.created_at)}</Text>
-                    {order.recipient_employee_name ? (
-                      <Text type="secondary">Принял: {order.recipient_employee_name}</Text>
+          <Table
+            rowKey="id"
+            dataSource={orders}
+            pagination={false}
+            scroll={{ x: 1100 }}
+            expandable={{
+              expandedRowRender: record => (
+                <div className="warehouse-orders-expanded">
+                  <div className="warehouse-orders-expanded__meta">
+                    {record.courier_name ? <Text>Курьер: {record.courier_name}</Text> : null}
+                    {record.recipient_employee_name ? <Text>Принял: {record.recipient_employee_name}</Text> : null}
+                    {record.rejection_reason ? <Text type="danger">Причина: {record.rejection_reason}</Text> : null}
+                  </div>
+                  <div className="admin-order-items">
+                    {(record.items || []).map(item => (
+                      <div key={item.id} className="admin-order-item-row">
+                        <span>{item.product_name}</span>
+                        <span>{item.quantity} шт.</span>
+                        <span>{formatCurrency(item.subtotal)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            }}
+            columns={[
+              {
+                title: 'ID',
+                dataIndex: 'id',
+                key: 'id',
+                width: 120,
+                render: value => `#${String(value).slice(0, 8)}`
+              },
+              {
+                title: 'Заключённый',
+                dataIndex: 'user_full_name',
+                key: 'user_full_name',
+                width: 220
+              },
+              {
+                title: 'Статус',
+                dataIndex: 'status',
+                key: 'status',
+                width: 190,
+                render: value => <Tag color={getOrderStatusColor(value)}>{formatOrderStatus(value)}</Tag>
+              },
+              {
+                title: 'Учреждение',
+                dataIndex: 'facility_name',
+                key: 'facility_name',
+                width: 220
+              },
+              {
+                title: 'Сумма',
+                dataIndex: 'total_amount',
+                key: 'total_amount',
+                width: 150,
+                render: value => formatCurrency(value)
+              },
+              {
+                title: 'Создан',
+                dataIndex: 'created_at',
+                key: 'created_at',
+                width: 180,
+                render: value => formatDateTime(value)
+              },
+              {
+                title: 'Действия',
+                key: 'actions',
+                width: 260,
+                render: (_, record) => (
+                  <Space wrap>
+                    {record.status === 'APPROVED' ? (
+                      <Button
+                        type="primary"
+                        size="small"
+                        loading={busyId === record.id}
+                        onClick={() => handleStartPacking(record.id)}
+                      >
+                        Взять в сборку
+                      </Button>
                     ) : null}
-                    {order.rejection_reason ? (
-                      <Text type="danger">Причина: {order.rejection_reason}</Text>
+                    {record.status === 'PACKING' ? (
+                      <Button size="small" onClick={() => openAssignModal(record)}>
+                        Назначить курьера
+                      </Button>
                     ) : null}
-
-                    <div className="admin-order-items">
-                      {(order.items || []).map(item => (
-                        <div key={item.id} className="admin-order-item-row">
-                          <span>{item.product_name}</span>
-                          <span>{item.quantity} шт.</span>
-                          <span>{formatCurrency(item.subtotal)}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <Space wrap>
-                      {order.status === 'APPROVED' ? (
-                        <Button
-                          type="primary"
-                          loading={busyId === order.id}
-                          onClick={() => handleStartPacking(order.id)}
-                        >
-                          Взять в сборку
-                        </Button>
-                      ) : null}
-                      {order.status === 'PACKING' ? (
-                        <Button onClick={() => openAssignModal(order)}>Назначить курьера</Button>
-                      ) : null}
-                    </Space>
                   </Space>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+                )
+              }
+            ]}
+          />
         )}
-      </Spin>
+      </Card>
 
       <Modal
         title="Назначить курьера"
