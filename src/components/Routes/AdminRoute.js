@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { getUserRole } from '../../utils/auth';
 import ProtectedRoute from './ProtectedRoute';
 
-const ALLOWED_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN'];
+const ALLOWED_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'];
 
 const AdminRoute = ({ children }) => (
   <ProtectedRoute>

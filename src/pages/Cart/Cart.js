@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Space, message } from 'antd';
+import { Alert, Button, Space, message } from 'antd';
 import './Cart.scss';
 import apiClient from '../../utils/apiClient';
+import { formatCurrency } from '../../utils/admin';
 import { changeCartQuantity, clearCart, getCartItems } from '../../utils/cart';
 
 const Cart = () => {
@@ -59,12 +60,12 @@ const Cart = () => {
 
   const total = cartItems.reduce((sum, item) => {
     const qty = item.quantity || 0;
-
     return sum + item.price * qty;
   }, 0);
 
   const handleOrder = async () => {
     setOrdering(true);
+
     try {
       await apiClient.post('/api/v1/orders', {
         items: cartItems.map(item => ({
@@ -72,6 +73,7 @@ const Cart = () => {
           quantity: item.quantity
         }))
       });
+      message.success('Заказ создан и ожидает одобрения. Средства будут списаны после подтверждения заказа.');
       clearCart();
       setCartItems([]);
     } catch (err) {
@@ -92,45 +94,53 @@ const Cart = () => {
               <div className="cart-wallet-stats">
                 <div className="cart-wallet-stat">
                   <span className="cart-wallet-stat-label">Баланс</span>
-                  <span className="cart-wallet-stat-value">{wallet.balance}</span>
+                  <span className="cart-wallet-stat-value">{formatCurrency(wallet.balance)}</span>
                 </div>
                 <div className="cart-wallet-stat">
                   <span className="cart-wallet-stat-label">Потрачено за месяц</span>
-                  <span className="cart-wallet-stat-value">{wallet.monthly_spent}</span>
+                  <span className="cart-wallet-stat-value">{formatCurrency(wallet.monthly_spent)}</span>
                 </div>
                 <div className="cart-wallet-stat">
                   <span className="cart-wallet-stat-label">Лимит на месяц</span>
-                  <span className="cart-wallet-stat-value">{wallet.monthly_limit}</span>
+                  <span className="cart-wallet-stat-value">{formatCurrency(wallet.monthly_limit)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {hasItems && (
+          {hasItems ? (
             <div className="cart-header-summary">
               <span className="cart-header-summary-label">Сумма заказа:</span>
-              <span className="cart-header-summary-value">{total.toFixed(2)} ₸</span>
+              <span className="cart-header-summary-value">{formatCurrency(total)}</span>
+              <span className="cart-header-summary-note">
+                Заказ будет создан и отправлен на одобрение.
+              </span>
               <Button type="primary" loading={ordering} onClick={handleOrder}>
                 Заказать
               </Button>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
       <div className="content-section">
         <div className="container">
-          {!hasItems && (
+          {!hasItems ? (
             <div className="empty-cart">
               <div className="empty-icon">
                 <img src="/sad_cry_exact.svg" alt="Пустая корзина" />
               </div>
               <p className="empty-text">Сейчас ваша корзина пуста!</p>
             </div>
-          )}
-
-          {hasItems && (
+          ) : (
             <div className="cart-content">
+              <Alert
+                type="info"
+                showIcon
+                className="cart-order-alert"
+                message="Заказ создаётся без мгновенного списания средств"
+                description="Средства будут списаны только после подтверждения заказа. Если доставка не состоится, статус заказа обновится, а деньги будут возвращены."
+              />
               <div className="cart-items">
                 {cartItems.map(item => (
                   <div key={item.id} className="cart-item">
@@ -140,9 +150,9 @@ const Cart = () => {
                     <div className="cart-item-info">
                       <h3 className="cart-item-name">{item.name}</h3>
                       <div className="cart-item-meta">
-                        <span className="cart-item-price">Цена: {item.price.toFixed(2)} ₸</span>
+                        <span className="cart-item-price">Цена: {formatCurrency(item.price)}</span>
                         <div className="cart-item-total">
-                          Сумма: {(item.price * (item.quantity || 0)).toFixed(2)} ₸
+                          Сумма: {formatCurrency(item.price * (item.quantity || 0))}
                         </div>
                         <Space className="cart-item-actions" size="small">
                           <Button

@@ -1,4 +1,11 @@
-export const unwrapResponseData = (payload) => payload?.data ?? payload;
+import {
+  formatOrderStatus as formatMappedOrderStatus,
+  ORDER_STATUS_COLORS,
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_OPTIONS
+} from './orderStatus';
+
+export const unwrapResponseData = payload => payload?.data ?? payload;
 
 export const SECURITY_REGIME_LABELS = {
   GENERAL: 'Общий режим',
@@ -6,21 +13,13 @@ export const SECURITY_REGIME_LABELS = {
   MAXIMUM: 'Максимальный режим'
 };
 
-export const ORDER_STATUS_LABELS = {
-  PENDING: 'Ожидает',
-  APPROVED: 'Одобрен',
-  REJECTED: 'Отклонён'
-};
-
-export const ORDER_STATUS_COLORS = {
-  PENDING: 'gold',
-  APPROVED: 'green',
-  REJECTED: 'red'
-};
+export { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS };
 
 export const ROLE_LABELS = {
   SUPER_ADMIN: 'Супер-администратор',
   PRISON_ADMIN: 'Начальник учреждения',
+  WAREHOUSE_MANAGER: 'Менеджер склада',
+  COURIER: 'Курьер',
   INMATE: 'Заключённый'
 };
 
@@ -29,21 +28,18 @@ export const securityRegimeOptions = Object.entries(SECURITY_REGIME_LABELS).map(
   label
 }));
 
-export const orderStatusOptions = Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => ({
-  value,
-  label
-}));
+export const orderStatusOptions = ORDER_STATUS_OPTIONS;
 
-export const formatCurrency = (value) => new Intl.NumberFormat('ru-RU', {
+export const formatCurrency = value => new Intl.NumberFormat('ru-RU', {
   style: 'currency',
   currency: 'KZT',
   minimumFractionDigits: 0,
   maximumFractionDigits: 0
 }).format(Number(value || 0));
 
-export const formatNumber = (value) => new Intl.NumberFormat('ru-RU').format(Number(value || 0));
+export const formatNumber = value => new Intl.NumberFormat('ru-RU').format(Number(value || 0));
 
-export const formatDate = (value) => {
+export const formatDate = value => {
   if (!value) {
     return '—';
   }
@@ -55,7 +51,7 @@ export const formatDate = (value) => {
   }).format(new Date(value));
 };
 
-export const formatDateTime = (value) => {
+export const formatDateTime = value => {
   if (!value) {
     return '—';
   }
@@ -79,8 +75,8 @@ export const getPercent = (value, maxValue) => {
 
 export const getApiErrorMessage = (error, fallback) => error?.response?.data?.message || fallback;
 
-export const formatSecurityRegime = (value) => SECURITY_REGIME_LABELS[value] || value || '—';
+export const formatSecurityRegime = value => SECURITY_REGIME_LABELS[value] || value || '—';
 
-export const formatOrderStatus = (value) => ORDER_STATUS_LABELS[value] || value || '—';
+export const formatOrderStatus = value => formatMappedOrderStatus(value);
 
-export const formatRole = (value) => ROLE_LABELS[value] || value || '—';
+export const formatRole = value => ROLE_LABELS[value] || value || '—';

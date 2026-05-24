@@ -7,7 +7,7 @@ import './Login.scss';
 
 const { Title } = Typography;
 
-const ADMIN_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN'];
+const ADMIN_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'];
 
 const faceFrameMetrics = canvas => {
   const ctx = canvas.getContext('2d');

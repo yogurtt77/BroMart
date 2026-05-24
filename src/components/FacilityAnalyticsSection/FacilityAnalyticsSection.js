@@ -23,6 +23,7 @@ import {
   formatDateTime,
   formatNumber,
   formatOrderStatus,
+  orderStatusOptions,
   getApiErrorMessage,
   getPercent,
   unwrapResponseData
@@ -431,11 +432,7 @@ const FacilityAnalyticsSection = () => {
                 allowClear
                 placeholder="Статус"
                 style={{ width: 180 }}
-                options={[
-                  { value: 'PENDING', label: 'Ожидает' },
-                  { value: 'APPROVED', label: 'Одобрен' },
-                  { value: 'REJECTED', label: 'Отклонён' }
-                ]}
+                options={orderStatusOptions}
                 onChange={value => {
                   const next = { ...facilityOrdersFilters, status: value, page: 1 };
                   setFacilityOrdersFilters(next);

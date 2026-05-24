@@ -7,6 +7,13 @@
     margin-bottom: 16px;
   }
 
+  .orders-toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
   .order-card {
     background: #f9f9f9;
     border-radius: 8px;

@@ -75,6 +75,13 @@
         font-weight: 600;
         color: #3d6d4f;
       }
+
+      .cart-header-summary-note {
+        max-width: 320px;
+        font-size: 13px;
+        color: #666;
+        text-align: right;
+      }
     }
 
     .page-title {
@@ -94,6 +101,10 @@
       flex-direction: column;
       gap: 30px;
       margin-bottom: 60px;
+
+      .cart-order-alert {
+        border-radius: 12px;
+      }
 
       .cart-items {
         display: grid;
@@ -152,29 +163,6 @@
           }
         }
       }
-
-      .cart-summary {
-        max-width: 400px;
-        margin-left: auto;
-        background: #f9f9f9;
-        border-radius: 8px;
-        padding: 20px 24px;
-
-        .summary-title {
-          font-size: 20px;
-          font-weight: 600;
-          margin: 0 0 16px;
-          color: #333;
-        }
-
-        .summary-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          font-size: 15px;
-          color: #333;
-        }
-      }
     }
 
     .empty-cart {
@@ -209,6 +197,10 @@
 
       .cart-header-summary {
         align-items: flex-start;
+
+        .cart-header-summary-note {
+          text-align: left;
+        }
       }
     }
 

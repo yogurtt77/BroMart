@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import FacilityForm from '../../components/FacilityForm/FacilityForm';
 import PrisonAdminsSection from '../../components/PrisonAdminsSection/PrisonAdminsSection';
+import RoleUsersSection from '../../components/RoleUsersSection/RoleUsersSection';
 import InmateWalletsSection from '../../components/InmateWalletsSection/InmateWalletsSection';
 import OrdersSection from '../../components/OrdersSection/OrdersSection';
 import AdminProfileSection from '../../components/AdminProfileSection/AdminProfileSection';
@@ -10,61 +11,84 @@ import FacilityAnalyticsSection from '../../components/FacilityAnalyticsSection/
 import InmatesManagementSection from '../../components/InmatesManagementSection/InmatesManagementSection';
 import MonthlyLimitsSection from '../../components/MonthlyLimitsSection/MonthlyLimitsSection';
 import AuditLogSection from '../../components/AuditLogSection/AuditLogSection';
+import WarehouseOrdersSection from '../../components/WarehouseOrdersSection/WarehouseOrdersSection';
+import CourierDeliveriesSection from '../../components/CourierDeliveriesSection/CourierDeliveriesSection';
 import { getUserRole } from '../../utils/auth';
 import './Admin.scss';
 
-const SUPER_ADMIN_NAVIGATION = [
-  { id: 'dashboard', label: 'Панель управления' },
-  { id: 'inventory', label: 'Управление складом' },
-  { id: 'facility-analytics', label: 'Аналитика по учреждениям' },
-  { id: 'inmates', label: 'Управление заключёнными' },
-  { id: 'monthly-limits', label: 'Месячные лимиты' },
-  { id: 'audit-log', label: 'Журнал аудита' },
-  { id: 'prison-admins', label: 'Начальники учреждений' },
-  { id: 'facility', label: 'Учреждения' }
-];
-
-const PRISON_ADMIN_NAVIGATION = [
-  { id: 'orders', label: 'Список заказов' },
-  { id: 'inmate-wallets', label: 'Счета заключённых' },
-  { id: 'profile', label: 'Заключённые' }
-];
-
-const SUPER_ADMIN_COMPONENTS = {
-  dashboard: DashboardSection,
-  inventory: InventorySection,
-  'facility-analytics': FacilityAnalyticsSection,
-  inmates: InmatesManagementSection,
-  'monthly-limits': MonthlyLimitsSection,
-  'audit-log': AuditLogSection,
-  'prison-admins': PrisonAdminsSection,
-  facility: FacilityForm
-};
-
-const PRISON_ADMIN_COMPONENTS = {
-  orders: OrdersSection,
-  'inmate-wallets': InmateWalletsSection,
-  profile: AdminProfileSection
+const ROLE_SECTIONS = {
+  SUPER_ADMIN: {
+    defaultSection: 'dashboard',
+    navigation: [
+      { id: 'dashboard', label: 'Панель управления' },
+      { id: 'inventory', label: 'Управление складом' },
+      { id: 'facility-analytics', label: 'Аналитика по учреждениям' },
+      { id: 'inmates', label: 'Управление заключёнными' },
+      { id: 'monthly-limits', label: 'Месячные лимиты' },
+      { id: 'audit-log', label: 'Журнал аудита' },
+      { id: 'prison-admins', label: 'Начальники учреждений' },
+      { id: 'role-users', label: 'Сотрудники по ролям' },
+      { id: 'facility', label: 'Учреждения' }
+    ],
+    components: {
+      dashboard: DashboardSection,
+      inventory: InventorySection,
+      'facility-analytics': FacilityAnalyticsSection,
+      inmates: InmatesManagementSection,
+      'monthly-limits': MonthlyLimitsSection,
+      'audit-log': AuditLogSection,
+      'prison-admins': PrisonAdminsSection,
+      'role-users': RoleUsersSection,
+      facility: FacilityForm
+    }
+  },
+  PRISON_ADMIN: {
+    defaultSection: 'orders',
+    navigation: [
+      { id: 'orders', label: 'Заказы учреждения' },
+      { id: 'inmate-wallets', label: 'Кошельки заключённых' },
+      { id: 'profile', label: 'Заключённые' }
+    ],
+    components: {
+      orders: OrdersSection,
+      'inmate-wallets': InmateWalletsSection,
+      profile: AdminProfileSection
+    }
+  },
+  WAREHOUSE_MANAGER: {
+    defaultSection: 'inventory',
+    navigation: [
+      { id: 'warehouse-orders', label: 'Заказы склада' },
+      { id: 'inventory', label: 'Каталог и склад' }
+    ],
+    components: {
+      'warehouse-orders': WarehouseOrdersSection,
+      inventory: InventorySection
+    }
+  },
+  COURIER: {
+    defaultSection: 'courier-deliveries',
+    navigation: [
+      { id: 'courier-deliveries', label: 'Мои доставки' }
+    ],
+    components: {
+      'courier-deliveries': CourierDeliveriesSection
+    }
+  }
 };
 
 const Admin = () => {
   const role = getUserRole();
-
-  const navigationItems = useMemo(() => (
-    role === 'SUPER_ADMIN' ? SUPER_ADMIN_NAVIGATION : PRISON_ADMIN_NAVIGATION
-  ), [role]);
-
-  const sectionComponents = useMemo(() => (
-    role === 'SUPER_ADMIN' ? SUPER_ADMIN_COMPONENTS : PRISON_ADMIN_COMPONENTS
-  ), [role]);
-
-  const [activeSection, setActiveSection] = useState(navigationItems[0]?.id || '');
+  const roleConfig = useMemo(() => ROLE_SECTIONS[role] || ROLE_SECTIONS.PRISON_ADMIN, [role]);
+  const navigationItems = roleConfig.navigation;
+  const sectionComponents = roleConfig.components;
+  const [activeSection, setActiveSection] = useState(roleConfig.defaultSection);
 
   useEffect(() => {
-    setActiveSection(navigationItems[0]?.id || '');
-  }, [navigationItems]);
+    setActiveSection(roleConfig.defaultSection);
+  }, [roleConfig]);
 
-  const ActiveSectionComponent = sectionComponents[activeSection] || sectionComponents[navigationItems[0]?.id];
+  const ActiveSectionComponent = sectionComponents[activeSection] || sectionComponents[roleConfig.defaultSection];
 
   return (
     <div className="admin-page">
@@ -74,7 +98,7 @@ const Admin = () => {
             <aside className="admin-sidebar">
               <h2 className="sidebar-title">Навигация</h2>
               <ul className="sidebar-menu">
-                {navigationItems.map((item) => (
+                {navigationItems.map(item => (
                   <li
                     key={item.id}
                     className={`sidebar-item ${activeSection === item.id ? 'sidebar-item--active' : ''}`}
