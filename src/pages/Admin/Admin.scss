@@ -514,6 +514,10 @@
     padding-top: 20px;
   }
 
+  .ant-form-item:has(input[type='hidden']) {
+    display: none;
+  }
+
   .inventory-product-form {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;

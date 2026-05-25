@@ -91,11 +91,11 @@ const InventorySection = () => {
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [stockProduct, setStockProduct] = useState(null);
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('');
+  const [currentImageUrl, setCurrentImageUrl] = useState('');
   const didLoadReferencesRef = useRef(false);
   const didLoadProductsRef = useRef(false);
   const didSyncFiltersRef = useRef(false);
   const watchedProductFileList = Form.useWatch('file', productForm);
-  const watchedProductImageUrl = Form.useWatch('image_url', productForm);
   const productFileList = useMemo(() => watchedProductFileList || [], [watchedProductFileList]);
 
   useEffect(() => {
@@ -274,6 +274,7 @@ const InventorySection = () => {
     setEditingProduct(null);
     setModalVendors([]);
     setUploadPreviewUrl('');
+    setCurrentImageUrl('');
     productForm.resetFields();
     setProductModalOpen(true);
   };
@@ -282,6 +283,7 @@ const InventorySection = () => {
     setEditingProduct(record);
     await loadVendors(record.category_id, 'modal');
     setUploadPreviewUrl('');
+    setCurrentImageUrl(record.image_url || '');
     productForm.setFieldsValue({
       name: record.name,
       description: record.description,
@@ -290,10 +292,17 @@ const InventorySection = () => {
       vendor_id: record.vendor_id,
       price: record.price,
       stock_quantity: record.stock_quantity,
-      image_url: record.image_url,
       file: []
     });
     setProductModalOpen(true);
+  };
+
+  const closeProductModal = () => {
+    setProductModalOpen(false);
+    setEditingProduct(null);
+    setUploadPreviewUrl('');
+    setCurrentImageUrl('');
+    productForm.resetFields();
   };
 
   const handleSaveProduct = async values => {
@@ -319,8 +328,6 @@ const InventorySection = () => {
 
         if (file) {
           formData.append('file', file);
-        } else if (values.image_url) {
-          formData.append('image_url', values.image_url);
         }
 
         request = apiClient.patch(`/api/v1/catalog/products/${editingProduct.id}`, formData);
@@ -341,8 +348,6 @@ const InventorySection = () => {
 
         if (file) {
           formData.append('file', file);
-        } else if (values.image_url) {
-          formData.append('image_url', values.image_url);
         }
 
         request = apiClient.post('/api/v1/catalog/products', formData);
@@ -350,9 +355,7 @@ const InventorySection = () => {
 
       const response = await request;
       message.success(response.data.message);
-      setProductModalOpen(false);
-      productForm.resetFields();
-      setUploadPreviewUrl('');
+      closeProductModal();
       await loadProducts();
     } catch (requestError) {
       message.error(getApiErrorMessage(requestError, 'Не удалось сохранить товар'));
@@ -597,7 +600,7 @@ const InventorySection = () => {
       <Modal
         title={modalTitle}
         open={productModalOpen}
-        onCancel={() => setProductModalOpen(false)}
+        onCancel={closeProductModal}
         onOk={() => productForm.submit()}
         confirmLoading={saving}
         width={980}
@@ -656,7 +659,7 @@ const InventorySection = () => {
                   <InputNumber min={0} style={{ width: '100%' }} />
                 </Form.Item>
                 <Form.Item label="Ссылка на изображение" name="image_url">
-                  <Input placeholder="https://..." />
+                  <Input type="hidden" />
                 </Form.Item>
               </div>
               <Form.Item
@@ -685,8 +688,8 @@ const InventorySection = () => {
                     <div className="inventory-product-form__upload-box">
                       {uploadPreviewUrl ? (
                         <img src={uploadPreviewUrl} alt="preview" />
-                      ) : watchedProductImageUrl ? (
-                        <img src={watchedProductImageUrl} alt="preview" />
+                      ) : currentImageUrl ? (
+                        <img src={currentImageUrl} alt="preview" />
                       ) : (
                         <div className="inventory-product-form__upload-placeholder">
                           <UploadOutlined />
