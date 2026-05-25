@@ -13,14 +13,14 @@ import {
 
 const { Header: AntHeader } = Layout;
 
-const selectedMenuKey = (pathname) => {
+const selectedMenuKey = pathname => {
   if (pathname === '/' || pathname.startsWith('/category')) {
     return '/';
   }
 
   const prefixes = ['/admin', '/login', '/faq', '/complaints', '/contacts', '/my-orders'];
 
-  return prefixes.find((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) || '';
+  return prefixes.find(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)) || '';
 };
 
 const Header = () => {
@@ -51,8 +51,10 @@ const Header = () => {
     window.location.replace('/');
   }, []);
 
-  const showAdmin = loggedIn && ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'].includes(getUserRole());
-  const showMyOrders = loggedIn && getUserRole() === 'INMATE';
+  const role = getUserRole();
+  const showAdmin = loggedIn && ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'].includes(role);
+  const showMyOrders = loggedIn && role === 'INMATE';
+  const showComplaints = loggedIn && !['WAREHOUSE_MANAGER', 'COURIER'].includes(role);
 
   const menuItems = useMemo(() => {
     const items = [
@@ -63,11 +65,13 @@ const Header = () => {
       items.push({ key: '/my-orders', label: <Link to="/my-orders">Мои заказы</Link> });
     }
 
-    items.push(
-      { key: '/faq', label: <Link to="/faq">Вопрос-ответ</Link> },
-      { key: '/complaints', label: <Link to="/complaints">Предложения и жалобы</Link> },
-      { key: '/contacts', label: <Link to="/contacts">Контакты</Link> }
-    );
+    items.push({ key: '/faq', label: <Link to="/faq">Вопрос-ответ</Link> });
+
+    if (showComplaints) {
+      items.push({ key: '/complaints', label: <Link to="/complaints">Предложения и жалобы</Link> });
+    }
+
+    items.push({ key: '/contacts', label: <Link to="/contacts">Контакты</Link> });
 
     if (showAdmin) {
       items.push({ key: '/admin', label: <Link to="/admin">Админка</Link> });
@@ -80,7 +84,7 @@ const Header = () => {
     );
 
     return items;
-  }, [loggedIn, showAdmin, showMyOrders, handleLogout]);
+  }, [loggedIn, showAdmin, showMyOrders, showComplaints, handleLogout]);
 
   const selectedKeys = selectedMenuKey(location.pathname);
   const menuSelectedKeys = selectedKeys ? [selectedKeys] : [];
@@ -108,13 +112,13 @@ const Header = () => {
             selectedKeys={menuSelectedKeys}
             className="site-header__menu"
           />
-          {showMyOrders && (
+          {showMyOrders ? (
             <Badge count={count} showZero size="small" color="#3d6d4f">
               <Link to="/cart" className="site-header__cart">
                 <ShoppingCartOutlined />
               </Link>
             </Badge>
-          )}
+          ) : null}
         </Flex>
       </Flex>
     </AntHeader>

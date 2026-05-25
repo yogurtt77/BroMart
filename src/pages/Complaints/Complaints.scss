@@ -7,34 +7,131 @@
     border-bottom: 1px solid #e0e0e0;
 
     .page-title {
-      margin: 0 0 10px !important;
+      margin: 0 !important;
       color: #333;
     }
   }
 
+  .complaints-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
   .content-section {
-    padding: 80px 0 120px;
+    padding: 60px 0 100px;
     background: #fff;
+  }
 
-    .form-wrapper {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #f9f9f9;
-      padding: 40px 36px;
-      border-radius: 8px;
-      box-shadow: none;
+  .complaints-alert {
+    margin-bottom: 16px;
+  }
 
-      .form-title {
-        text-align: center;
-        margin: 0 0 32px !important;
-        color: #333;
-      }
+  .complaints-table-card {
+    border-radius: 16px !important;
+    border: 1px solid #ececec !important;
+    box-shadow: none !important;
 
-      .complaints-form {
-        .complaints-submit-wrap {
-          margin-bottom: 0;
-        }
-      }
+    .ant-card-body {
+      min-width: 0;
     }
+
+    .ant-table-wrapper {
+      overflow-x: auto;
+    }
+
+    .ant-table-cell {
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      vertical-align: top;
+    }
+  }
+
+  .complaints-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 16px;
+  }
+}
+
+.complaints-page--admin {
+  .complaints-admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .complaints-admin-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .complaints-admin-title {
+    margin: 0 !important;
+    color: #333;
+  }
+
+  .complaints-admin-note {
+    color: #777;
+    display: block;
+    margin-top: 6px;
+  }
+}
+
+.complaints-user-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.complaints-user-title {
+  margin: 0 0 12px !important;
+  color: #333;
+}
+
+.form-wrapper {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+  background: #f9f9f9 !important;
+  padding: 40px 36px;
+  border-radius: 16px !important;
+  border: 1px solid #ececec !important;
+  box-shadow: none !important;
+
+  .complaints-form {
+    .complaints-submit-wrap {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.complaints-table-card--user {
+  .ant-card-body {
+    padding: 20px 22px !important;
+  }
+}
+
+.complaints-list-title {
+  margin: 0 0 16px !important;
+  color: #333;
+}
+
+@media (max-width: 992px) {
+  .complaints-page {
+    .complaints-filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .form-wrapper {
+    padding: 28px 20px;
   }
 }
