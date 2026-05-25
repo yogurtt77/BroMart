@@ -18,10 +18,8 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
-  DeliveredProcedureOutlined,
-  EnvironmentOutlined,
   InboxOutlined,
-  SendOutlined,
+  CarOutlined,
   ToolOutlined
 } from '@ant-design/icons';
 import apiClient from '../../utils/apiClient';
@@ -37,15 +35,11 @@ const unwrapResponseData = payload => payload?.data ?? payload;
 
 const STATUS_CARDS = [
   { key: 'PENDING', title: 'Ожидают', icon: <ClockCircleOutlined />, tone: 'orange' },
-  { key: 'APPROVED', title: 'Одобрены', icon: <CheckCircleOutlined />, tone: 'green' },
-  { key: 'PACKING', title: 'В сборке', icon: <ToolOutlined />, tone: 'purple' },
-  { key: 'READY_FOR_SHIPMENT', title: 'Готовы к отправке', icon: <InboxOutlined />, tone: 'cyan' },
-  { key: 'OUT_FOR_DELIVERY', title: 'В пути', icon: <SendOutlined />, tone: 'blue' },
-  { key: 'ARRIVED_AT_FACILITY', title: 'Прибыли', icon: <EnvironmentOutlined />, tone: 'geekblue' },
-  { key: 'DELIVERED', title: 'Доставлены', icon: <DeliveredProcedureOutlined />, tone: 'lime' },
+  { key: 'APPROVED', title: 'Одобрены', icon: <InboxOutlined />, tone: 'green' },
+  { key: 'PACKING', title: 'Собираются', icon: <ToolOutlined />, tone: 'gold' },
+  { key: 'READY_FOR_SHIPMENT', title: 'Готовы к отправке', icon: <CarOutlined />, tone: 'cyan' },
   { key: 'FAILED_DELIVERY', title: 'Проблемные', icon: <CloseCircleOutlined />, tone: 'red' },
-  { key: 'REJECTED', title: 'Отклонены', icon: <CloseCircleOutlined />, tone: 'volcano' },
-  { key: 'CANCELLED', title: 'Отменены', icon: <CloseCircleOutlined />, tone: 'default' }
+  { key: 'DELIVERED', title: 'Доставлены', icon: <CheckCircleOutlined />, tone: 'blue' }
 ];
 
 const OrdersSection = () => {

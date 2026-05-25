@@ -73,27 +73,13 @@ const WarehouseOrdersSection = () => {
   const [assigning, setAssigning] = useState(false);
   const didLoadRef = useRef(false);
 
-  const loadData = useCallback(async (nextFilters = filters) => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError('');
 
-    const params = {};
-
-    if (nextFilters.status) {
-      params.status = nextFilters.status;
-    }
-
-    if (nextFilters.full_name) {
-      params.full_name = nextFilters.full_name;
-    }
-
-    if (nextFilters.facility_id) {
-      params.facility_id = nextFilters.facility_id;
-    }
-
     try {
       const [ordersResponse, couriersResponse, facilitiesResponse] = await Promise.all([
-        apiClient.get('/api/v1/orders', { params }),
+        apiClient.get('/api/v1/orders'),
         apiClient.get('/api/v1/users', { params: { role: 'COURIER' } }),
         apiClient.get('/api/v1/facilities')
       ]);
@@ -113,7 +99,7 @@ const WarehouseOrdersSection = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, []);
 
   useEffect(() => {
     if (didLoadRef.current) {
@@ -121,7 +107,7 @@ const WarehouseOrdersSection = () => {
     }
 
     didLoadRef.current = true;
-    loadData(INITIAL_FILTERS);
+    loadData();
   }, [loadData]);
 
   const statusCounters = useMemo(() => (
@@ -130,6 +116,16 @@ const WarehouseOrdersSection = () => {
       count: orders.filter(order => order.status === card.key).length
     }))
   ), [orders]);
+
+  const filteredOrders = useMemo(() => orders.filter(order => {
+    const matchesName = !filters.full_name || (order.user_full_name || '')
+      .toLowerCase()
+      .includes(filters.full_name.toLowerCase());
+    const matchesStatus = !filters.status || order.status === filters.status;
+    const matchesFacility = !filters.facility_id || order.facility_id === filters.facility_id;
+
+    return matchesName && matchesStatus && matchesFacility;
+  }), [filters, orders]);
 
   const courierOptions = couriers.map(courier => ({
     value: courier.id,
@@ -148,7 +144,7 @@ const WarehouseOrdersSection = () => {
     try {
       const response = await apiClient.post(`/api/v1/orders/${orderId}/start-packing`);
       message.success(response.data.message);
-      await loadData(filters);
+      await loadData();
     } catch (requestError) {
       const nextError = getApiErrorMessage(requestError, 'Не удалось взять заказ в сборку');
       message.error(nextError);
@@ -178,7 +174,7 @@ const WarehouseOrdersSection = () => {
       message.success(response.data.message);
       setAssignOrder(null);
       form.resetFields();
-      await loadData(filters);
+      await loadData();
     } catch (requestError) {
       const nextError = getApiErrorMessage(requestError, 'Не удалось назначить курьера');
       message.error(nextError);
@@ -189,31 +185,26 @@ const WarehouseOrdersSection = () => {
   };
 
   const handleFilterFinish = values => {
-    const nextFilters = {
+    setFilters({
       full_name: values.full_name || '',
       status: values.status,
       facility_id: values.facility_id
-    };
-
-    setFilters(nextFilters);
-    loadData(nextFilters);
+    });
   };
 
   const handleResetFilters = () => {
     filterForm.resetFields();
     setFilters(INITIAL_FILTERS);
-    loadData(INITIAL_FILTERS);
   };
 
   const handleStatusCardClick = status => {
-    const nextFilters = {
-      ...filters,
-      status
-    };
+    const nextStatus = filters.status === status ? undefined : status;
 
-    filterForm.setFieldsValue({ status });
-    setFilters(nextFilters);
-    loadData(nextFilters);
+    filterForm.setFieldsValue({ status: nextStatus });
+    setFilters(prev => ({
+      ...prev,
+      status: nextStatus
+    }));
   };
 
   return (
@@ -265,12 +256,12 @@ const WarehouseOrdersSection = () => {
       </Card>
 
       <Card className="admin-table-card warehouse-orders-section__table-card">
-        {loading ? null : !orders.length ? (
+        {loading ? null : !filteredOrders.length ? (
           <Empty description="Заказов нет" />
         ) : (
           <Table
             rowKey="id"
-            dataSource={orders}
+            dataSource={filteredOrders}
             pagination={false}
             scroll={{ x: 1100 }}
             expandable={{
