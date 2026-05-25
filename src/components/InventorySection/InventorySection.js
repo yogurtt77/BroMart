@@ -95,6 +95,7 @@ const InventorySection = () => {
   const didLoadProductsRef = useRef(false);
   const didSyncFiltersRef = useRef(false);
   const watchedProductFileList = Form.useWatch('file', productForm);
+  const watchedProductImageUrl = Form.useWatch('image_url', productForm);
   const productFileList = useMemo(() => watchedProductFileList || [], [watchedProductFileList]);
 
   useEffect(() => {
@@ -289,7 +290,8 @@ const InventorySection = () => {
       vendor_id: record.vendor_id,
       price: record.price,
       stock_quantity: record.stock_quantity,
-      image_url: record.image_url
+      image_url: record.image_url,
+      file: []
     });
     setProductModalOpen(true);
   };
@@ -301,16 +303,27 @@ const InventorySection = () => {
       let request;
 
       if (editingProduct) {
-        request = apiClient.patch(`/api/v1/catalog/products/${editingProduct.id}`, {
-          name: values.name,
-          description: values.description,
-          category_id: values.category_id,
-          facility_id: values.facility_id,
-          vendor_id: values.vendor_id,
-          price: values.price,
-          stock_quantity: values.stock_quantity,
-          image_url: values.image_url
-        });
+        const formData = new FormData();
+        formData.append('name', values.name);
+        formData.append('description', values.description || '');
+        formData.append('category_id', values.category_id);
+        formData.append('facility_id', values.facility_id);
+        formData.append('price', String(values.price));
+        formData.append('stock_quantity', String(values.stock_quantity));
+
+        if (values.vendor_id) {
+          formData.append('vendor_id', values.vendor_id);
+        }
+
+        const file = values.file?.[0]?.originFileObj;
+
+        if (file) {
+          formData.append('file', file);
+        } else if (values.image_url) {
+          formData.append('image_url', values.image_url);
+        }
+
+        request = apiClient.patch(`/api/v1/catalog/products/${editingProduct.id}`, formData);
       } else {
         const formData = new FormData();
         formData.append('name', values.name);
@@ -655,8 +668,7 @@ const InventorySection = () => {
               </Form.Item>
             </div>
 
-            {!editingProduct ? (
-              <div className="inventory-product-form__upload">
+            <div className="inventory-product-form__upload">
                 <Form.Item
                   label="Изображение товара"
                   name="file"
@@ -673,6 +685,8 @@ const InventorySection = () => {
                     <div className="inventory-product-form__upload-box">
                       {uploadPreviewUrl ? (
                         <img src={uploadPreviewUrl} alt="preview" />
+                      ) : watchedProductImageUrl ? (
+                        <img src={watchedProductImageUrl} alt="preview" />
                       ) : (
                         <div className="inventory-product-form__upload-placeholder">
                           <UploadOutlined />
@@ -694,7 +708,6 @@ const InventorySection = () => {
                   </Upload>
                 </Form.Item>
               </div>
-            ) : null}
           </div>
         </Form>
       </Modal>
