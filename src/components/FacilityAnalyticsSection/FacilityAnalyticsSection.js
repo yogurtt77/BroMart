@@ -281,7 +281,7 @@ const FacilityAnalyticsSection = () => {
       <Spin spinning={loading}>
         <Row gutter={[16, 16]} className="admin-stats-grid">
           {SUMMARY_CARDS.map(item => (
-            <Col xs={24} sm={12} xl={6} key={item.key}>
+            <Col xs={24} sm={12} xl={12} key={item.key}>
               <Card className={`admin-overview-card ${item.colorClass}`}>
                 <span className="admin-overview-card__icon">{item.icon}</span>
                 <div className="admin-overview-card__label">{item.title}</div>

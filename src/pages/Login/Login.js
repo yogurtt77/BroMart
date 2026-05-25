@@ -174,14 +174,10 @@ const Login = () => {
       <div className="page-header">
         <div className="container">
           <h1 className="page-title">Мой аккаунт</h1>
-          <div className="breadcrumb">
-            <span>Мой аккаунт</span>
           </div>
-        </div>
       </div>
 
       <div className="content-section">
-        <div className="container">
           <Card className="form-wrapper" bordered={false}>
             <Title level={2} className="form-title">
               Вход
@@ -234,7 +230,6 @@ const Login = () => {
               </Form.Item>
             </Form>
           </Card>
-        </div>
       </div>
     </div>
   );

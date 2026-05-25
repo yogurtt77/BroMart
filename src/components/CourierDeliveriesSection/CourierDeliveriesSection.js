@@ -3,22 +3,27 @@ import {
   Alert,
   Button,
   Card,
-  Col,
   Empty,
   Form,
   Input,
   Modal,
-  Row,
   Space,
   Spin,
+  Table,
   Tabs,
   Tag,
   Typography,
   message
 } from 'antd';
 import apiClient from '../../utils/apiClient';
-import { formatCurrency, formatDateTime, getApiErrorMessage, unwrapResponseData } from '../../utils/admin';
+import {
+  formatCurrency,
+  formatDateTime,
+  getApiErrorMessage,
+  unwrapResponseData
+} from '../../utils/admin';
 import { formatOrderStatus, getOrderStatusColor } from '../../utils/orderStatus';
+import './CourierDeliveriesSection.scss';
 
 const { Title, Text } = Typography;
 
@@ -26,6 +31,12 @@ const TAB_STATUS_MAP = {
   ready: ['READY_FOR_SHIPMENT'],
   transit: ['OUT_FOR_DELIVERY', 'ARRIVED_AT_FACILITY'],
   completed: ['DELIVERED', 'FAILED_DELIVERY']
+};
+
+const TAB_TITLES = {
+  ready: 'Готов к отправке',
+  transit: 'В пути',
+  completed: 'Завершенные'
 };
 
 const CourierDeliveriesSection = () => {
@@ -69,6 +80,22 @@ const CourierDeliveriesSection = () => {
     const allowedStatuses = new Set(TAB_STATUS_MAP[activeTab] || []);
     return orders.filter(order => allowedStatuses.has(order.status));
   }, [activeTab, orders]);
+
+  const tabItems = useMemo(
+    () =>
+      Object.keys(TAB_STATUS_MAP).map(key => ({
+        key,
+        label: (
+          <span className="courier-deliveries-section__tab-label">
+            <span>{TAB_TITLES[key]}</span>
+            <span className="courier-deliveries-section__tab-count">
+              {orders.filter(order => TAB_STATUS_MAP[key].includes(order.status)).length}
+            </span>
+          </span>
+        )
+      })),
+    [orders]
+  );
 
   const updateDeliveryStatus = async (orderId, action, payload) => {
     setBusyId(orderId);
@@ -130,7 +157,7 @@ const CourierDeliveriesSection = () => {
   };
 
   return (
-    <section className="admin-section">
+    <section className="admin-section courier-deliveries-section">
       <div className="admin-section-header">
         <div>
           <Title level={3} className="admin-section-title">Мои доставки</Title>
@@ -140,46 +167,137 @@ const CourierDeliveriesSection = () => {
 
       {error ? <Alert type="error" message={error} showIcon className="admin-alert" /> : null}
 
-      <Card className="admin-table-card">
+      <Card className="admin-table-card courier-deliveries-section__tabs-card">
         <Tabs
           activeKey={activeTab}
           onChange={setActiveTab}
-          items={[
-            { key: 'ready', label: 'Готов к отправке' },
-            { key: 'transit', label: 'В пути' },
-            { key: 'completed', label: 'Завершенные' }
-          ]}
+          items={tabItems}
+          className="courier-deliveries-section__tabs"
         />
       </Card>
 
       <Spin spinning={loading}>
-        {!deliveries.length ? (
-          <Card className="admin-table-card">
+        <Card className="admin-table-card">
+          {!deliveries.length ? (
             <Empty description="Доставок нет" />
-          </Card>
-        ) : (
-          <Row gutter={[16, 16]}>
-            {deliveries.map(order => (
-              <Col key={order.id} xs={24} xl={12}>
-                <Card className="admin-card">
-                  <Space direction="vertical" size={10} style={{ width: '100%' }}>
+          ) : (
+            <Table
+              rowKey="id"
+              dataSource={deliveries}
+              pagination={false}
+              scroll={{ x: 1120 }}
+              columns={[
+                {
+                  title: 'Заказ',
+                  dataIndex: 'id',
+                  key: 'id',
+                  width: 120,
+                  render: value => `#${String(value).slice(0, 8)}`
+                },
+                {
+                  title: 'Заключённый',
+                  dataIndex: 'user_full_name',
+                  key: 'user_full_name',
+                  width: 210
+                },
+                {
+                  title: 'Учреждение',
+                  dataIndex: 'facility_name',
+                  key: 'facility_name',
+                  width: 220
+                },
+                {
+                  title: 'Статус',
+                  dataIndex: 'status',
+                  key: 'status',
+                  width: 180,
+                  render: value => (
+                    <Tag color={getOrderStatusColor(value)}>{formatOrderStatus(value)}</Tag>
+                  )
+                },
+                {
+                  title: 'Сумма',
+                  dataIndex: 'total_amount',
+                  key: 'total_amount',
+                  width: 150,
+                  render: value => formatCurrency(value)
+                },
+                {
+                  title: 'Создан',
+                  dataIndex: 'created_at',
+                  key: 'created_at',
+                  width: 180,
+                  render: value => formatDateTime(value)
+                },
+                {
+                  title: 'Принял',
+                  dataIndex: 'recipient_employee_name',
+                  key: 'recipient_employee_name',
+                  width: 190,
+                  render: value => value || '—'
+                },
+                {
+                  title: 'Действия',
+                  key: 'actions',
+                  width: 260,
+                  render: (_, record) => (
                     <Space wrap>
-                      <Tag color={getOrderStatusColor(order.status)}>{formatOrderStatus(order.status)}</Tag>
-                      {order.courier_name ? <Tag color="blue">Курьер: {order.courier_name}</Tag> : null}
+                      {record.status === 'READY_FOR_SHIPMENT' ? (
+                        <Button
+                          type="primary"
+                          loading={busyId === record.id}
+                          onClick={() => handleDepart(record.id)}
+                        >
+                          Выехал
+                        </Button>
+                      ) : null}
+                      {record.status === 'OUT_FOR_DELIVERY' ? (
+                        <Button
+                          type="primary"
+                          loading={busyId === record.id}
+                          onClick={() => handleArrive(record.id)}
+                        >
+                          Прибыл
+                        </Button>
+                      ) : null}
+                      {record.status === 'ARRIVED_AT_FACILITY' ? (
+                        <Button
+                          type="primary"
+                          loading={busyId === record.id}
+                          onClick={() => openDeliverModal(record)}
+                        >
+                          Передать
+                        </Button>
+                      ) : null}
+                      {['READY_FOR_SHIPMENT', 'OUT_FOR_DELIVERY', 'ARRIVED_AT_FACILITY'].includes(
+                        record.status
+                      ) ? (
+                        <Button
+                          danger
+                          loading={busyId === record.id}
+                          onClick={() => openFailModal(record)}
+                        >
+                          Проблема
+                        </Button>
+                      ) : null}
                     </Space>
-                    <Text strong>{order.user_full_name || '—'}</Text>
-                    <Text type="secondary">Учреждение: {order.facility_name || '—'}</Text>
-                    <Text>Сумма: {formatCurrency(order.total_amount)}</Text>
-                    <Text type="secondary">Дата: {formatDateTime(order.created_at)}</Text>
-                    {order.recipient_employee_name ? (
-                      <Text type="secondary">Принял: {order.recipient_employee_name}</Text>
-                    ) : null}
-                    {order.rejection_reason ? (
-                      <Text type="danger">Причина: {order.rejection_reason}</Text>
-                    ) : null}
-
+                  )
+                }
+              ]}
+              expandable={{
+                expandedRowRender: record => (
+                  <div className="courier-deliveries-section__expanded">
+                    <div className="courier-deliveries-section__expanded-meta">
+                      {record.courier_name ? <Text>Курьер: {record.courier_name}</Text> : null}
+                      {record.recipient_employee_name ? (
+                        <Text>Принял: {record.recipient_employee_name}</Text>
+                      ) : null}
+                      {record.rejection_reason ? (
+                        <Text type="danger">Причина: {record.rejection_reason}</Text>
+                      ) : null}
+                    </div>
                     <div className="admin-order-items">
-                      {(order.items || []).map(item => (
+                      {(record.items || []).map(item => (
                         <div key={item.id} className="admin-order-item-row">
                           <span>{item.product_name}</span>
                           <span>{item.quantity} шт.</span>
@@ -187,47 +305,12 @@ const CourierDeliveriesSection = () => {
                         </div>
                       ))}
                     </div>
-
-                    <Space wrap>
-                      {order.status === 'READY_FOR_SHIPMENT' ? (
-                        <Button
-                          type="primary"
-                          loading={busyId === order.id}
-                          onClick={() => handleDepart(order.id)}
-                        >
-                          Выехал
-                        </Button>
-                      ) : null}
-                      {order.status === 'OUT_FOR_DELIVERY' ? (
-                        <Button
-                          type="primary"
-                          loading={busyId === order.id}
-                          onClick={() => handleArrive(order.id)}
-                        >
-                          Прибыл в учреждение
-                        </Button>
-                      ) : null}
-                      {order.status === 'ARRIVED_AT_FACILITY' ? (
-                        <Button
-                          type="primary"
-                          loading={busyId === order.id}
-                          onClick={() => openDeliverModal(order)}
-                        >
-                          Передать
-                        </Button>
-                      ) : null}
-                      {['READY_FOR_SHIPMENT', 'OUT_FOR_DELIVERY', 'ARRIVED_AT_FACILITY'].includes(order.status) ? (
-                        <Button danger loading={busyId === order.id} onClick={() => openFailModal(order)}>
-                          Проблема с доставкой
-                        </Button>
-                      ) : null}
-                    </Space>
-                  </Space>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        )}
+                  </div>
+                )
+              }}
+            />
+          )}
+        </Card>
       </Spin>
 
       <Modal
@@ -237,6 +320,8 @@ const CourierDeliveriesSection = () => {
         onOk={() => deliverForm.submit()}
         confirmLoading={busyId === deliverOrder?.id}
         destroyOnClose
+        okText="Сохранить"
+        cancelText="Отмена"
       >
         <Form form={deliverForm} layout="vertical" onFinish={handleDeliver}>
           <Form.Item
@@ -256,6 +341,8 @@ const CourierDeliveriesSection = () => {
         onOk={() => failForm.submit()}
         confirmLoading={busyId === failOrder?.id}
         destroyOnClose
+        okText="Сохранить"
+        cancelText="Отмена"
       >
         <Form form={failForm} layout="vertical" onFinish={handleFailDelivery}>
           <Form.Item
