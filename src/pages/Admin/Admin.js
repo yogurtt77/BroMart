@@ -12,6 +12,7 @@ import MonthlyLimitsSection from '../../components/MonthlyLimitsSection/MonthlyL
 import AuditLogSection from '../../components/AuditLogSection/AuditLogSection';
 import WarehouseOrdersSection from '../../components/WarehouseOrdersSection/WarehouseOrdersSection';
 import CourierDeliveriesSection from '../../components/CourierDeliveriesSection/CourierDeliveriesSection';
+import VendorsSection from '../../components/VendorsSection/VendorsSection';
 import { getUserRole } from '../../utils/auth';
 import './Admin.scss';
 
@@ -55,11 +56,13 @@ const ROLE_SECTIONS = {
     defaultSection: 'inventory',
     navigation: [
       { id: 'warehouse-orders', label: 'Заказы склада' },
-      { id: 'inventory', label: 'Каталог и склад' }
+      { id: 'inventory', label: 'Каталог и склад' },
+      { id: 'vendors', label: 'Поставщики' }
     ],
     components: {
       'warehouse-orders': WarehouseOrdersSection,
-      inventory: InventorySection
+      inventory: InventorySection,
+      vendors: VendorsSection
     }
   },
   COURIER: {
@@ -84,7 +87,8 @@ const Admin = () => {
     setActiveSection(roleConfig.defaultSection);
   }, [roleConfig]);
 
-  const ActiveSectionComponent = sectionComponents[activeSection] || sectionComponents[roleConfig.defaultSection];
+  const ActiveSectionComponent =
+    sectionComponents[activeSection] || sectionComponents[roleConfig.defaultSection];
 
   return (
     <div className="admin-page">
