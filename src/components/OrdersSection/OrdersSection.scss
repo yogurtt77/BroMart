@@ -7,16 +7,26 @@
     margin-bottom: 16px;
   }
 
-  .orders-toolbar {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
+  .orders-section__stats {
+    margin-bottom: 0 !important;
   }
 
-  .order-card {
-    background: #f9f9f9;
-    border-radius: 8px;
+  .orders-table-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .orders-expanded {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .orders-expanded__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
   }
 
   .order-items-block {
@@ -28,11 +38,6 @@
 
   .order-item-row {
     margin-top: 6px;
-  }
-
-  .order-actions {
-    display: flex;
-    gap: 8px;
   }
 
   .reject-comment-block {

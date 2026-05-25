@@ -1,19 +1,22 @@
 .inmate-wallets-section {
-  .wallets-title {
+  .wallets-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .wallets-title {
+    margin-bottom: 0 !important;
   }
 
   .wallets-alert {
     margin-bottom: 16px;
   }
 
-  .wallets-submit-wrap {
-    margin-bottom: 0;
-  }
-
-  .wallets-list {
-    margin-top: 24px;
-
+  .wallets-table-card {
     h4 {
       margin-bottom: 16px;
     }

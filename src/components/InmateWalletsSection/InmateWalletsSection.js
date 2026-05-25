@@ -1,18 +1,47 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Card, Col, Form, InputNumber, Row, Select, Space, Spin, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Form,
+  InputNumber,
+  Modal,
+  Select,
+  Spin,
+  Table,
+  Typography,
+  message
+} from 'antd';
 import apiClient from '../../utils/apiClient';
+import { formatCurrency } from '../../utils/admin';
 import './InmateWalletsSection.scss';
 
-const { Title, Text } = Typography;
-const unwrapResponseData = (payload) => payload?.data ?? payload;
+const { Title } = Typography;
+const unwrapResponseData = payload => payload?.data ?? payload;
 
 const InmateWalletsSection = () => {
   const [form] = Form.useForm();
   const [wallets, setWallets] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState('');
   const didLoadRef = useRef(false);
+
+  const loadWallets = async () => {
+    setFetching(true);
+
+    try {
+      const response = await apiClient.get('/api/v1/wallet/inmates');
+      const walletsList = unwrapResponseData(response.data);
+      setWallets(Array.isArray(walletsList) ? walletsList : []);
+      setError('');
+    } catch (requestError) {
+      setError(requestError?.response?.data?.message || 'Ошибка загрузки счетов заключённых');
+      setWallets([]);
+    } finally {
+      setFetching(false);
+    }
+  };
 
   useEffect(() => {
     if (didLoadRef.current) {
@@ -23,52 +52,109 @@ const InmateWalletsSection = () => {
     loadWallets();
   }, []);
 
-  const loadWallets = async () => {
-    setFetching(true);
-    try {
-      const response = await apiClient.get('/api/v1/wallet/inmates');
-      const walletsList = unwrapResponseData(response.data);
-      setWallets(Array.isArray(walletsList) ? walletsList : []);
-    } catch (err) {
-      setError('Ошибка загрузки счетов заключённых');
-    } finally {
-      setFetching(false);
-    }
-  };
-
-  const handleSubmit = async (values) => {
+  const handleSubmit = async values => {
     setLoading(true);
     setError('');
 
     try {
-      await apiClient.post('/api/v1/wallet/top-up', {
+      const response = await apiClient.post('/api/v1/wallet/top-up', {
         user_id: values.user_id,
         amount: values.amount
       });
+      message.success(response.data.message);
       form.resetFields();
+      setModalOpen(false);
       await loadWallets();
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Ошибка пополнения счёта');
+    } catch (requestError) {
+      const nextError = requestError?.response?.data?.message || 'Ошибка пополнения счёта';
+      message.error(nextError);
+      setError(nextError);
     } finally {
       setLoading(false);
     }
   };
 
-  const inmateOptions = wallets.map((wallet) => ({
+  const inmateOptions = wallets.map(wallet => ({
     value: wallet.user_id,
     label: wallet.full_name
   }));
 
   return (
     <section className="inmate-wallets-section">
-      <Title level={3} className="wallets-title">Счета заключённых</Title>
+      <div className="wallets-header">
+        <Title level={3} className="wallets-title">Счета заключённых</Title>
+        <Button type="primary" onClick={() => setModalOpen(true)}>
+          Пополнить счёт
+        </Button>
+      </div>
 
       {error && <Alert type="error" message={error} showIcon className="wallets-alert" />}
 
       <Spin spinning={fetching}>
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
+        <div className="wallets-table-card">
+          <Table
+            rowKey="user_id"
+            dataSource={wallets}
+            pagination={false}
+            scroll={{ x: 1100 }}
+            columns={[
+              {
+                title: 'ID',
+                dataIndex: 'user_id',
+                key: 'user_id',
+                width: 140,
+                render: value => `#${String(value).slice(0, 8)}`
+              },
+              {
+                title: 'Заключённый',
+                dataIndex: 'full_name',
+                key: 'full_name'
+              },
+              {
+                title: 'Учреждение',
+                dataIndex: 'facility_name',
+                key: 'facility_name',
+                render: value => value || '—'
+              },
+              {
+                title: 'Баланс',
+                dataIndex: 'balance',
+                key: 'balance',
+                width: 160,
+                render: value => formatCurrency(value)
+              },
+              {
+                title: 'Потрачено за месяц',
+                dataIndex: 'monthly_spent',
+                key: 'monthly_spent',
+                width: 190,
+                render: value => formatCurrency(value)
+              },
+              {
+                title: 'Лимит в месяц',
+                dataIndex: 'monthly_limit',
+                key: 'monthly_limit',
+                width: 180,
+                render: value => formatCurrency(value)
+              }
+            ]}
+          />
+        </div>
+      </Spin>
+
+      <Modal
+        title="Пополнить счёт"
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={() => form.submit()}
+        okText="Пополнить счёт"
+        cancelText="Отмена"
+        confirmLoading={loading}
+        destroyOnClose
+        width={760}
+      >
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <div className="admin-filter-grid">
             <Form.Item
               label="Заключённый"
               name="user_id"
@@ -76,9 +162,7 @@ const InmateWalletsSection = () => {
             >
               <Select options={inmateOptions} placeholder="Выберите заключённого" />
             </Form.Item>
-          </Col>
 
-          <Col xs={24} md={12}>
             <Form.Item
               label="Сумма пополнения"
               name="amount"
@@ -86,34 +170,9 @@ const InmateWalletsSection = () => {
             >
               <InputNumber min={1} style={{ width: '100%' }} placeholder="Введите сумму" />
             </Form.Item>
-          </Col>
-        </Row>
-
-        <Form.Item className="wallets-submit-wrap">
-          <Button type="primary" htmlType="submit" loading={loading}>
-            ПОПОЛНИТЬ СЧЁТ
-          </Button>
-        </Form.Item>
-      </Form>
-
-      <div className="wallets-list">
-        <Title level={4}>Список счетов</Title>
-        <Row gutter={[16, 16]}>
-          {wallets.map((wallet) => (
-            <Col key={wallet.user_id} xs={24} sm={12} lg={8}>
-              <Card size="small" hoverable>
-                <Space direction="vertical" size={4}>
-                  <Text strong>{wallet.full_name}</Text>
-                  <Text type="secondary">Учреждение: {wallet.facility_name}</Text>
-                  <Text>Баланс: {wallet.balance}</Text>
-                  <Text type="secondary">Потрачено за месяц: {wallet.monthly_spent}</Text>
-                </Space>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </div>
-      </Spin>
+          </div>
+        </Form>
+      </Modal>
     </section>
   );
 };

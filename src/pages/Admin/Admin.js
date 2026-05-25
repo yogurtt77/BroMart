@@ -20,7 +20,6 @@ const ROLE_SECTIONS = {
     defaultSection: 'dashboard',
     navigation: [
       { id: 'dashboard', label: 'Панель управления' },
-      { id: 'inventory', label: 'Управление складом' },
       { id: 'facility-analytics', label: 'Аналитика по учреждениям' },
       { id: 'inmates', label: 'Управление заключёнными' },
       { id: 'monthly-limits', label: 'Месячные лимиты' },

@@ -1,5 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { CheckOutlined, EditOutlined, InboxOutlined, StopOutlined } from '@ant-design/icons';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  CheckOutlined,
+  EditOutlined,
+  InboxOutlined,
+  StopOutlined,
+  UploadOutlined
+} from '@ant-design/icons';
 import {
   Alert,
   Button,
@@ -16,10 +22,16 @@ import {
   Table,
   Tag,
   Typography,
+  Upload,
   message
 } from 'antd';
 import apiClient from '../../utils/apiClient';
-import { formatCurrency, formatDateTime, getApiErrorMessage, unwrapResponseData } from '../../utils/admin';
+import {
+  formatCurrency,
+  formatDateTime,
+  getApiErrorMessage,
+  unwrapResponseData
+} from '../../utils/admin';
 
 const { Title, Text } = Typography;
 
@@ -47,6 +59,14 @@ const INITIAL_FILTERS = {
   threshold: 10
 };
 
+const normalizeUploadValue = event => {
+  if (Array.isArray(event)) {
+    return event;
+  }
+
+  return event?.fileList || [];
+};
+
 const InventorySection = () => {
   const [filterForm] = Form.useForm();
   const [productForm] = Form.useForm();
@@ -70,9 +90,28 @@ const InventorySection = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [stockModalOpen, setStockModalOpen] = useState(false);
   const [stockProduct, setStockProduct] = useState(null);
+  const [uploadPreviewUrl, setUploadPreviewUrl] = useState('');
   const didLoadReferencesRef = useRef(false);
   const didLoadProductsRef = useRef(false);
   const didSyncFiltersRef = useRef(false);
+  const watchedProductFileList = Form.useWatch('file', productForm);
+  const productFileList = useMemo(() => watchedProductFileList || [], [watchedProductFileList]);
+
+  useEffect(() => {
+    const file = productFileList[0]?.originFileObj;
+
+    if (!file) {
+      setUploadPreviewUrl('');
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setUploadPreviewUrl(previewUrl);
+
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [productFileList]);
 
   const loadReferences = async () => {
     try {
@@ -233,14 +272,15 @@ const InventorySection = () => {
   const openCreateModal = () => {
     setEditingProduct(null);
     setModalVendors([]);
+    setUploadPreviewUrl('');
     productForm.resetFields();
-    productForm.setFieldsValue({ is_active: true });
     setProductModalOpen(true);
   };
 
   const openEditModal = async record => {
     setEditingProduct(record);
     await loadVendors(record.category_id, 'modal');
+    setUploadPreviewUrl('');
     productForm.setFieldsValue({
       name: record.name,
       description: record.description,
@@ -249,8 +289,7 @@ const InventorySection = () => {
       vendor_id: record.vendor_id,
       price: record.price,
       stock_quantity: record.stock_quantity,
-      image_url: record.image_url,
-      is_active: record.is_active
+      image_url: record.image_url
     });
     setProductModalOpen(true);
   };
@@ -259,14 +298,48 @@ const InventorySection = () => {
     setSaving(true);
 
     try {
-      const request = editingProduct
-        ? apiClient.patch(`/api/v1/catalog/products/${editingProduct.id}`, values)
-        : apiClient.post('/api/v1/catalog/products', values);
+      let request;
+
+      if (editingProduct) {
+        request = apiClient.patch(`/api/v1/catalog/products/${editingProduct.id}`, {
+          name: values.name,
+          description: values.description,
+          category_id: values.category_id,
+          facility_id: values.facility_id,
+          vendor_id: values.vendor_id,
+          price: values.price,
+          stock_quantity: values.stock_quantity,
+          image_url: values.image_url
+        });
+      } else {
+        const formData = new FormData();
+        formData.append('name', values.name);
+        formData.append('description', values.description || '');
+        formData.append('category_id', values.category_id);
+        formData.append('facility_id', values.facility_id);
+        formData.append('price', String(values.price));
+        formData.append('stock_quantity', String(values.stock_quantity));
+
+        if (values.vendor_id) {
+          formData.append('vendor_id', values.vendor_id);
+        }
+
+        const file = values.file?.[0]?.originFileObj;
+
+        if (file) {
+          formData.append('file', file);
+        } else if (values.image_url) {
+          formData.append('image_url', values.image_url);
+        }
+
+        request = apiClient.post('/api/v1/catalog/products', formData);
+      }
 
       const response = await request;
       message.success(response.data.message);
       setProductModalOpen(false);
       productForm.resetFields();
+      setUploadPreviewUrl('');
       await loadProducts();
     } catch (requestError) {
       message.error(getApiErrorMessage(requestError, 'Не удалось сохранить товар'));
@@ -310,7 +383,10 @@ const InventorySection = () => {
     setStockSaving(true);
 
     try {
-      const response = await apiClient.patch(`/api/v1/catalog/products/${stockProduct.id}/stock`, values);
+      const response = await apiClient.patch(
+        `/api/v1/catalog/products/${stockProduct.id}/stock`,
+        values
+      );
       message.success(response.data.message);
       setStockModalOpen(false);
       stockForm.resetFields();
@@ -326,6 +402,8 @@ const InventorySection = () => {
   const facilityOptions = facilities.map(item => ({ value: item.id, label: item.name }));
   const vendorOptions = vendors.map(item => ({ value: item.id, label: item.name }));
   const modalVendorOptions = modalVendors.map(item => ({ value: item.id, label: item.name }));
+
+  const modalTitle = editingProduct ? 'Редактирование товара' : 'Создание товара';
 
   return (
     <section className="admin-section">
@@ -504,76 +582,120 @@ const InventorySection = () => {
       </Spin>
 
       <Modal
-        title={editingProduct ? 'Редактирование товара' : 'Создание товара'}
+        title={modalTitle}
         open={productModalOpen}
         onCancel={() => setProductModalOpen(false)}
         onOk={() => productForm.submit()}
         confirmLoading={saving}
-        width={760}
+        width={980}
+        className="inventory-product-modal"
         okText="Сохранить"
         cancelText="Отмена"
+        destroyOnClose
       >
         <Form form={productForm} layout="vertical" onFinish={handleSaveProduct}>
-          <div className="admin-filter-grid">
-            <Form.Item
-              label="Название"
-              name="name"
-              rules={[{ required: true, message: 'Введите название товара' }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Категория"
-              name="category_id"
-              rules={[{ required: true, message: 'Выберите категорию' }]}
-            >
-              <Select
-                options={categoryOptions}
-                placeholder="Выберите категорию"
-                onChange={value => {
-                  productForm.setFieldValue('vendor_id', undefined);
-                  loadVendors(value, 'modal');
-                }}
-              />
-            </Form.Item>
-            <Form.Item
-              label="Учреждение"
-              name="facility_id"
-              rules={[{ required: true, message: 'Выберите учреждение' }]}
-            >
-              <Select options={facilityOptions} placeholder="Выберите учреждение" />
-            </Form.Item>
-            <Form.Item
-              label="Поставщик"
-              name="vendor_id"
-              rules={[{ required: true, message: 'Выберите поставщика' }]}
-            >
-              <Select options={modalVendorOptions} placeholder="Выберите поставщика" />
-            </Form.Item>
-            <Form.Item label="Цена" name="price" rules={[{ required: true, message: 'Введите цену' }]}>
-              <InputNumber min={0} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item
-              label="Остаток"
-              name="stock_quantity"
-              rules={[{ required: true, message: 'Введите остаток' }]}
-            >
-              <InputNumber min={0} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item label="Ссылка на изображение" name="image_url">
-              <Input />
-            </Form.Item>
-            <Form.Item label="Активен" name="is_active" valuePropName="checked">
-              <Switch />
-            </Form.Item>
+          <div className="inventory-product-form">
+            <div className="inventory-product-form__fields">
+              <div className="admin-filter-grid">
+                <Form.Item
+                  label="Название"
+                  name="name"
+                  rules={[{ required: true, message: 'Введите название товара' }]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  label="Категория"
+                  name="category_id"
+                  rules={[{ required: true, message: 'Выберите категорию' }]}
+                >
+                  <Select
+                    options={categoryOptions}
+                    placeholder="Выберите категорию"
+                    onChange={value => {
+                      productForm.setFieldValue('vendor_id', undefined);
+                      loadVendors(value, 'modal');
+                    }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Учреждение"
+                  name="facility_id"
+                  rules={[{ required: true, message: 'Выберите учреждение' }]}
+                >
+                  <Select options={facilityOptions} placeholder="Выберите учреждение" />
+                </Form.Item>
+                <Form.Item label="Поставщик" name="vendor_id">
+                  <Select options={modalVendorOptions} placeholder="Выберите поставщика" />
+                </Form.Item>
+                <Form.Item
+                  label="Цена"
+                  name="price"
+                  rules={[{ required: true, message: 'Введите цену' }]}
+                >
+                  <InputNumber min={0} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item
+                  label="Остаток"
+                  name="stock_quantity"
+                  rules={[{ required: true, message: 'Введите остаток' }]}
+                >
+                  <InputNumber min={0} style={{ width: '100%' }} />
+                </Form.Item>
+                <Form.Item label="Ссылка на изображение" name="image_url">
+                  <Input placeholder="https://..." />
+                </Form.Item>
+              </div>
+              <Form.Item
+                label="Описание"
+                name="description"
+                rules={[{ required: true, message: 'Введите описание' }]}
+              >
+                <Input.TextArea rows={4} />
+              </Form.Item>
+            </div>
+
+            {!editingProduct ? (
+              <div className="inventory-product-form__upload">
+                <Form.Item
+                  label="Изображение товара"
+                  name="file"
+                  valuePropName="fileList"
+                  getValueFromEvent={normalizeUploadValue}
+                >
+                  <Upload
+                    beforeUpload={() => false}
+                    maxCount={1}
+                    accept="image/*"
+                    showUploadList={false}
+                    className="inventory-product-form__uploader"
+                  >
+                    <div className="inventory-product-form__upload-box">
+                      {uploadPreviewUrl ? (
+                        <img src={uploadPreviewUrl} alt="preview" />
+                      ) : (
+                        <div className="inventory-product-form__upload-placeholder">
+                          <UploadOutlined />
+                          <span>Перетащите фото сюда</span>
+                          <small>или нажмите кнопку ниже</small>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      type="primary"
+                      className="inventory-product-form__upload-button"
+                      icon={<UploadOutlined />}
+                    >
+                      Выбрать файл
+                    </Button>
+                    <div className="inventory-product-form__upload-hint">
+                      jpg, png, webp
+                    </div>
+                  </Upload>
+                </Form.Item>
+              </div>
+            ) : null}
           </div>
-          <Form.Item
-            label="Описание"
-            name="description"
-            rules={[{ required: true, message: 'Введите описание' }]}
-          >
-            <Input.TextArea rows={4} />
-          </Form.Item>
         </Form>
       </Modal>
 
@@ -594,7 +716,11 @@ const InventorySection = () => {
           >
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item label="Причина" name="reason" rules={[{ required: true, message: 'Введите причину' }]}>
+          <Form.Item
+            label="Причина"
+            name="reason"
+            rules={[{ required: true, message: 'Введите причину' }]}
+          >
             <Input.TextArea rows={3} />
           </Form.Item>
         </Form>

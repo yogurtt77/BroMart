@@ -1,19 +1,22 @@
 .admin-profile-section {
-  .section-title {
+  .admin-profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .admin-profile-title {
+    margin-bottom: 0 !important;
+  }
+
+  .admin-profile-alert {
     margin-bottom: 16px;
   }
 
-  .section-alert {
-    margin-bottom: 16px;
-  }
-
-  .section-submit-wrap {
-    margin-bottom: 0;
-  }
-
-  .section-list {
-    margin-top: 24px;
-
+  .admin-profile-table-card {
     h4 {
       margin-bottom: 16px;
     }

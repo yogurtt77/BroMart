@@ -2,23 +2,32 @@ import React from 'react';
 import {
   Alert,
   Button,
-  Card,
   Col,
   Form,
   Input,
+  Modal,
   Row,
   Select,
-  Space,
   Spin,
+  Table,
+  Tag,
   Typography,
-  Upload
+  Upload,
+  message
 } from 'antd';
 import apiClient from '../../utils/apiClient';
+import { formatDateTime, formatSecurityRegime, getSecurityRegimeColor } from '../../utils/admin';
 import './AdminProfileSection.scss';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const unwrapResponseData = payload => payload?.data ?? payload;
 const getTodayDate = () => new Date().toISOString().split('T')[0];
+
+const SECURITY_MODE_OPTIONS = [
+  { value: 'GENERAL', label: 'Общий режим' },
+  { value: 'STRICT', label: 'Строгий режим' },
+  { value: 'MAXIMUM', label: 'Максимальный режим' }
+];
 
 const AdminProfileSection = () => {
   const [form] = Form.useForm();
@@ -26,6 +35,7 @@ const AdminProfileSection = () => {
   const [facilities, setFacilities] = React.useState([]);
   const [fetching, setFetching] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
+  const [modalOpen, setModalOpen] = React.useState(false);
   const [error, setError] = React.useState('');
   const didLoadRef = React.useRef(false);
 
@@ -39,6 +49,9 @@ const AdminProfileSection = () => {
   }, []);
 
   const loadInitialData = async () => {
+    setFetching(true);
+    setError('');
+
     try {
       const [usersResponse, facilitiesResponse] = await Promise.all([
         apiClient.get('/api/v1/users', { params: { role: 'INMATE' } }),
@@ -50,8 +63,12 @@ const AdminProfileSection = () => {
 
       setInmates(Array.isArray(usersList) ? usersList : []);
       setFacilities(Array.isArray(facilitiesList) ? facilitiesList : []);
-    } catch (err) {
-      setError('Ошибка загрузки заключённых или учреждений');
+    } catch (requestError) {
+      setError(
+        requestError?.response?.data?.message || 'Ошибка загрузки заключённых или учреждений'
+      );
+      setInmates([]);
+      setFacilities([]);
     } finally {
       setFetching(false);
     }
@@ -70,7 +87,9 @@ const AdminProfileSection = () => {
     formData.append('iin', values.iin);
     formData.append('transfer_date', currentDate);
     formData.append('release_date', currentDate);
-    formData.append('security_mode', values.security_mode);
+    formData.append('security_regime', values.security_regime);
+    formData.append('monthly_limit', values.monthly_limit);
+
     const file = values.file?.[0]?.originFileObj;
     if (file) {
       formData.append('file', file);
@@ -78,11 +97,16 @@ const AdminProfileSection = () => {
 
     try {
       const response = await apiClient.post('/api/v1/users/inmates/with-photo', formData);
+      message.success(response.data.message);
       const newInmate = unwrapResponseData(response.data);
       setInmates(prev => [...prev, newInmate]);
       form.resetFields();
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Ошибка создания заключённого');
+      setModalOpen(false);
+    } catch (requestError) {
+      const nextError =
+        requestError?.response?.data?.message || 'Ошибка создания заключённого';
+      message.error(nextError);
+      setError(nextError);
     } finally {
       setLoading(false);
     }
@@ -95,13 +119,84 @@ const AdminProfileSection = () => {
 
   return (
     <section className="admin-profile-section">
-      <Title level={3} className="section-title">
-        Заключённые
-      </Title>
+      <div className="admin-profile-header">
+        <Title level={3} className="admin-profile-title">
+          Заключённые
+        </Title>
+        <Button type="primary" onClick={() => setModalOpen(true)}>
+          Создать
+        </Button>
+      </div>
 
-      {error && <Alert type="error" message={error} showIcon className="section-alert" />}
+      {error && <Alert type="error" message={error} showIcon className="admin-profile-alert" />}
 
       <Spin spinning={fetching}>
+        <div className="admin-profile-table-card">
+          <Table
+            rowKey="id"
+            dataSource={inmates}
+            pagination={false}
+            scroll={{ x: 1200 }}
+            columns={[
+              {
+                title: 'ФИО',
+                dataIndex: 'full_name',
+                key: 'full_name'
+              },
+              {
+                title: 'ИИН',
+                dataIndex: 'iin',
+                key: 'iin',
+                width: 160
+              },
+              {
+                title: 'Учреждение',
+                dataIndex: 'facility_name',
+                key: 'facility_name'
+              },
+              {
+                title: 'Email',
+                dataIndex: 'email',
+                key: 'email'
+              },
+              {
+                title: 'Режим',
+                dataIndex: 'security_regime',
+                key: 'security_regime',
+                width: 170,
+                render: value => (
+                  <Tag color={getSecurityRegimeColor(value)}>{formatSecurityRegime(value)}</Tag>
+                )
+              },
+              {
+                title: 'Лимит в месяц',
+                dataIndex: 'monthly_limit',
+                key: 'monthly_limit',
+                width: 150
+              },
+              {
+                title: 'Дата создания',
+                dataIndex: 'created_at',
+                key: 'created_at',
+                width: 180,
+                render: value => formatDateTime(value)
+              }
+            ]}
+          />
+        </div>
+      </Spin>
+
+      <Modal
+        title="Создать заключённого"
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        onOk={() => form.submit()}
+        okText="Создать заключённого"
+        cancelText="Отмена"
+        confirmLoading={loading}
+        destroyOnClose
+        width={860}
+      >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Row gutter={16}>
             <Col xs={24} md={12}>
@@ -166,14 +261,23 @@ const AdminProfileSection = () => {
             <Col xs={24} md={12}>
               <Form.Item
                 label="Режим безопасности"
-                name="security_mode"
+                name="security_regime"
                 rules={[{ required: true, message: 'Выберите режим безопасности' }]}
               >
-                <Select placeholder="Выберите режим безопасности">
-                  <Select.Option value="GENERAL">Обычный</Select.Option>
-                  <Select.Option value="STRICT">Строгий</Select.Option>
-                  <Select.Option value="MAXIMUM">Максимальный</Select.Option>
-                </Select>
+                <Select
+                  options={SECURITY_MODE_OPTIONS}
+                  placeholder="Выберите режим безопасности"
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Месячный лимит"
+                name="monthly_limit"
+                rules={[{ required: true, message: 'Введите месячный лимит' }]}
+              >
+                <Input placeholder="Введите месячный лимит" />
               </Form.Item>
             </Col>
           </Row>
@@ -182,38 +286,15 @@ const AdminProfileSection = () => {
             label="Фото заключённого"
             name="file"
             valuePropName="fileList"
-            getValueFromEvent={e => (Array.isArray(e) ? e : e?.fileList)}
+            getValueFromEvent={event => (Array.isArray(event) ? event : event?.fileList)}
+            rules={[{ required: true, message: 'Загрузите фото заключённого' }]}
           >
             <Upload beforeUpload={() => false} maxCount={1} accept="image/*">
               <Button>Загрузить фото заключённого</Button>
             </Upload>
           </Form.Item>
-
-          <Form.Item className="section-submit-wrap">
-            <Button type="primary" htmlType="submit" loading={loading}>
-              СОЗДАТЬ ЗАКЛЮЧЁННОГО
-            </Button>
-          </Form.Item>
         </Form>
-
-        <div className="section-list">
-          <Title level={4}>Список заключённых</Title>
-          <Row gutter={[16, 16]}>
-            {inmates.map(inmate => (
-              <Col key={inmate.id} xs={24} sm={12} lg={8}>
-                <Card size="small" hoverable>
-                  <Space direction="vertical" size={4}>
-                    <Text strong>{inmate.full_name}</Text>
-                    <Text type="secondary">ИИН: {inmate.iin}</Text>
-                    <Text type="secondary">Учреждение: {inmate.facility_name}</Text>
-                    <Text type="secondary">Email: {inmate.email}</Text>
-                  </Space>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </div>
-      </Spin>
+      </Modal>
     </section>
   );
 };
