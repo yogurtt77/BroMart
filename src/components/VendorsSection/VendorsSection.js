@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckOutlined,
   EditOutlined,
@@ -16,6 +16,7 @@ import {
   Select,
   Space,
   Spin,
+  Switch,
   Table,
   Tag,
   Typography,
@@ -42,6 +43,7 @@ const VendorsSection = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [showActive, setShowActive] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingVendor, setEditingVendor] = useState(null);
   const [uploadPreviewUrl, setUploadPreviewUrl] = useState('');
@@ -66,13 +68,15 @@ const VendorsSection = () => {
     };
   }, [fileList]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError('');
 
     try {
       const [vendorsResponse, categoriesResponse] = await Promise.all([
-        apiClient.get('/api/v1/catalog/vendors'),
+        apiClient.get('/api/v1/catalog/vendors', {
+          params: { is_active: showActive }
+        }),
         apiClient.get('/api/v1/catalog/categories')
       ]);
 
@@ -83,7 +87,7 @@ const VendorsSection = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showActive]);
 
   useEffect(() => {
     if (didLoadRef.current) {
@@ -92,7 +96,15 @@ const VendorsSection = () => {
 
     didLoadRef.current = true;
     loadData();
-  }, []);
+  }, [loadData]);
+
+  useEffect(() => {
+    if (!didLoadRef.current) {
+      return;
+    }
+
+    loadData();
+  }, [loadData]);
 
   const closeModal = () => {
     setModalOpen(false);
@@ -119,7 +131,6 @@ const VendorsSection = () => {
       name: record.name,
       category_id: record.category_id,
       sort_order: record.sort_order,
-      logo_url: record.logo_url,
       file: []
     });
     setModalOpen(true);
@@ -145,8 +156,6 @@ const VendorsSection = () => {
 
       if (file) {
         formData.append('file', file);
-      } else if (values.logo_url) {
-        formData.append('logo_url', values.logo_url);
       }
 
       let response;
@@ -183,10 +192,6 @@ const VendorsSection = () => {
 
       formData.append('is_active', String(!record.is_active));
 
-      if (record.logo_url) {
-        formData.append('logo_url', record.logo_url);
-      }
-
       const response = await apiClient.patch(`/api/v1/catalog/vendors/${record.id}`, formData);
       message.success(response.data.message);
       await loadData();
@@ -211,9 +216,15 @@ const VendorsSection = () => {
             Список поставщиков, управление статусом и загрузка логотипа.
           </Text>
         </div>
-        <Button type="primary" onClick={openCreateModal}>
-          Добавить поставщика
-        </Button>
+        <Space wrap>
+          <Space>
+            <Text>{showActive ? 'Активные' : 'Неактивные'}</Text>
+            <Switch checked={showActive} onChange={setShowActive} />
+          </Space>
+          <Button type="primary" onClick={openCreateModal}>
+            Добавить поставщика
+          </Button>
+        </Space>
       </div>
 
       {error && <Alert type="error" message={error} showIcon className="admin-alert" />}
@@ -353,9 +364,6 @@ const VendorsSection = () => {
                 </Form.Item>
                 <Form.Item label="Порядок сортировки" name="sort_order">
                   <InputNumber min={0} style={{ width: '100%' }} />
-                </Form.Item>
-                <Form.Item label="Ссылка на логотип" name="logo_url">
-                  <Input placeholder="https://..." />
                 </Form.Item>
               </div>
             </div>
