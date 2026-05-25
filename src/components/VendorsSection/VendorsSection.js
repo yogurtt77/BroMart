@@ -13,6 +13,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Popconfirm,
   Select,
   Space,
   Spin,
@@ -304,18 +305,31 @@ const VendorsSection = () => {
                       >
                         Редактировать
                       </Button>
-                      <Button
-                        className={`admin-action-button ${
-                          record.is_active
-                            ? 'admin-action-button--danger'
-                            : 'admin-action-button--success'
-                        }`}
-                        icon={record.is_active ? <StopOutlined /> : <CheckOutlined />}
-                        size="small"
-                        onClick={() => handleToggleActive(record)}
-                      >
-                        {record.is_active ? 'Деактивировать' : 'Активировать'}
-                      </Button>
+                      {record.is_active ? (
+                        <Popconfirm
+                          title="Деактивировать поставщика?"
+                          okText="Да"
+                          cancelText="Нет"
+                          onConfirm={() => handleToggleActive(record)}
+                        >
+                          <Button
+                            className="admin-action-button admin-action-button--danger"
+                            icon={<StopOutlined />}
+                            size="small"
+                          >
+                            Деактивировать
+                          </Button>
+                        </Popconfirm>
+                      ) : (
+                        <Button
+                          className="admin-action-button admin-action-button--success"
+                          icon={<CheckOutlined />}
+                          size="small"
+                          onClick={() => handleToggleActive(record)}
+                        >
+                          Активировать
+                        </Button>
+                      )}
                     </Space>
                   )
                 }
