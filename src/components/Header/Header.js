@@ -13,6 +13,13 @@ import {
 
 const { Header: AntHeader } = Layout;
 
+const ADMIN_LABELS = {
+  SUPER_ADMIN: 'Кабинет супер-админа',
+  PRISON_ADMIN: 'Кабинет начальника учреждения',
+  WAREHOUSE_MANAGER: 'Кабинет начальника склада',
+  COURIER: 'Кабинет курьера'
+};
+
 const selectedMenuKey = pathname => {
   if (pathname === '/' || pathname.startsWith('/category')) {
     return '/';
@@ -55,6 +62,7 @@ const Header = () => {
   const showAdmin = loggedIn && ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'].includes(role);
   const showMyOrders = loggedIn && role === 'INMATE';
   const showComplaints = loggedIn && !['WAREHOUSE_MANAGER', 'COURIER'].includes(role);
+  const adminLabel = ADMIN_LABELS[role] || 'Админка';
 
   const menuItems = useMemo(() => {
     const items = [
@@ -74,7 +82,7 @@ const Header = () => {
     items.push({ key: '/contacts', label: <Link to="/contacts">Контакты</Link> });
 
     if (showAdmin) {
-      items.push({ key: '/admin', label: <Link to="/admin">Админка</Link> });
+      items.push({ key: '/admin', label: <Link to="/admin">{adminLabel}</Link> });
     }
 
     items.push(
@@ -84,7 +92,7 @@ const Header = () => {
     );
 
     return items;
-  }, [loggedIn, showAdmin, showMyOrders, showComplaints, handleLogout]);
+  }, [loggedIn, showAdmin, showMyOrders, showComplaints, adminLabel, handleLogout]);
 
   const selectedKeys = selectedMenuKey(location.pathname);
   const menuSelectedKeys = selectedKeys ? [selectedKeys] : [];
