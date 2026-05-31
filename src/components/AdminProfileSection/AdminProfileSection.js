@@ -88,7 +88,6 @@ const AdminProfileSection = () => {
     formData.append('transfer_date', currentDate);
     formData.append('release_date', currentDate);
     formData.append('security_regime', values.security_regime);
-    formData.append('monthly_limit', values.monthly_limit);
 
     const file = values.file?.[0]?.originFileObj;
     if (file) {
@@ -128,7 +127,7 @@ const AdminProfileSection = () => {
         </Button>
       </div>
 
-      {error && <Alert type="error" message={error} showIcon className="admin-profile-alert" />}
+      {error ? <Alert type="error" message={error} showIcon className="admin-profile-alert" /> : null}
 
       <Spin spinning={fetching}>
         <div className="admin-profile-table-card">
@@ -268,16 +267,6 @@ const AdminProfileSection = () => {
                   options={SECURITY_MODE_OPTIONS}
                   placeholder="Выберите режим безопасности"
                 />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Месячный лимит"
-                name="monthly_limit"
-                rules={[{ required: true, message: 'Введите месячный лимит' }]}
-              >
-                <Input placeholder="Введите месячный лимит" />
               </Form.Item>
             </Col>
           </Row>

@@ -8,7 +8,6 @@ import {
   Drawer,
   Form,
   Input,
-  InputNumber,
   Modal,
   Select,
   Space,
@@ -40,6 +39,15 @@ const ACTIVE_OPTIONS = [
   { value: 'false', label: 'Неактивные' }
 ];
 
+const INITIAL_FILTERS = {
+  facility_id: undefined,
+  security_regime: undefined,
+  is_active: 'all',
+  search: '',
+  page: 1,
+  pageSize: 10
+};
+
 const InmatesManagementSection = () => {
   const [filterForm] = Form.useForm();
   const [createForm] = Form.useForm();
@@ -52,14 +60,7 @@ const InmatesManagementSection = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState({
-    facility_id: undefined,
-    security_regime: undefined,
-    is_active: 'all',
-    search: '',
-    page: 1,
-    pageSize: 10
-  });
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -109,12 +110,16 @@ const InmatesManagementSection = () => {
     try {
       const response = await apiClient.get('/api/v1/users', { params });
       const list = unwrapResponseData(response.data);
+
       setInmates(list);
-      setPagination((prev) => ({
+      setPagination(prev => ({
         ...prev,
         current: filters.page,
         pageSize: filters.pageSize,
-        total: list.length < filters.pageSize ? (filters.page - 1) * filters.pageSize + list.length : filters.page * filters.pageSize + 1
+        total:
+          list.length < filters.pageSize
+            ? (filters.page - 1) * filters.pageSize + list.length
+            : filters.page * filters.pageSize + 1
       }));
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, 'Не удалось загрузить список заключённых'));
@@ -163,8 +168,8 @@ const InmatesManagementSection = () => {
     loadInmates();
   }, [filters, loadInmates]);
 
-  const handleFilterFinish = (values) => {
-    setFilters((prev) => ({
+  const handleFilterFinish = values => {
+    setFilters(prev => ({
       ...prev,
       facility_id: values.facility_id,
       security_regime: values.security_regime,
@@ -176,17 +181,10 @@ const InmatesManagementSection = () => {
 
   const handleResetFilters = () => {
     filterForm.resetFields();
-    setFilters({
-      facility_id: undefined,
-      security_regime: undefined,
-      is_active: 'all',
-      search: '',
-      page: 1,
-      pageSize: 10
-    });
+    setFilters(INITIAL_FILTERS);
   };
 
-  const handleCreate = async (values) => {
+  const handleCreate = async values => {
     setSaving(true);
 
     const formData = new FormData();
@@ -198,7 +196,6 @@ const InmatesManagementSection = () => {
     formData.append('iin', values.iin);
     formData.append('transfer_date', values.transfer_date);
     formData.append('release_date', values.release_date);
-    formData.append('monthly_limit', values.monthly_limit);
     formData.append('file', values.file[0].originFileObj);
 
     try {
@@ -214,11 +211,13 @@ const InmatesManagementSection = () => {
     }
   };
 
-  const openEditModal = async (userId) => {
+  const openEditModal = async userId => {
     setSaving(true);
+
     try {
       const response = await apiClient.get(`/api/v1/users/${userId}`);
       const inmate = unwrapResponseData(response.data);
+
       setSelectedInmate(inmate);
       editForm.setFieldsValue({
         full_name: inmate.full_name,
@@ -233,7 +232,7 @@ const InmatesManagementSection = () => {
     }
   };
 
-  const handleUpdateInmate = async (values) => {
+  const handleUpdateInmate = async values => {
     setSaving(true);
 
     try {
@@ -249,15 +248,16 @@ const InmatesManagementSection = () => {
     }
   };
 
-  const openSettingsModal = async (userId) => {
+  const openSettingsModal = async userId => {
     setSaving(true);
+
     try {
       const response = await apiClient.get(`/api/v1/users/${userId}`);
       const inmate = unwrapResponseData(response.data);
+
       setSelectedInmate(inmate);
       settingsForm.setFieldsValue({
-        security_regime: inmate.security_regime,
-        monthly_limit: inmate.monthly_limit
+        security_regime: inmate.security_regime
       });
       setSettingsModalOpen(true);
     } catch (requestError) {
@@ -267,11 +267,14 @@ const InmatesManagementSection = () => {
     }
   };
 
-  const handleUpdateSettings = async (values) => {
+  const handleUpdateSettings = async values => {
     setSaving(true);
 
     try {
-      const response = await apiClient.patch(`/api/v1/users/${selectedInmate.id}/inmate-settings`, values);
+      const response = await apiClient.patch(
+        `/api/v1/users/${selectedInmate.id}/inmate-settings`,
+        values
+      );
       message.success(response.data.message);
       setSettingsModalOpen(false);
       settingsForm.resetFields();
@@ -283,7 +286,7 @@ const InmatesManagementSection = () => {
     }
   };
 
-  const openDetailsDrawer = async (record) => {
+  const openDetailsDrawer = async record => {
     setSelectedInmate(record);
     setDetailsDrawerOpen(true);
     setDetailsLoading(true);
@@ -303,7 +306,7 @@ const InmatesManagementSection = () => {
     }
   };
 
-  const facilityOptions = facilities.map((item) => ({
+  const facilityOptions = facilities.map(item => ({
     value: item.id,
     label: item.name
   }));
@@ -313,12 +316,16 @@ const InmatesManagementSection = () => {
       <div className="admin-section-header">
         <div>
           <Title level={3} className="admin-section-title">Управление заключёнными</Title>
-          <Text className="admin-section-note">Список, поиск, фильтры, создание, редактирование, заказы и кошелёк.</Text>
+          <Text className="admin-section-note">
+            Список, поиск, фильтры, создание, редактирование, заказы и кошелёк.
+          </Text>
         </div>
-        <Button type="primary" onClick={() => setCreateModalOpen(true)}>Создать заключённого</Button>
+        <Button type="primary" onClick={() => setCreateModalOpen(true)}>
+          Создать заключённого
+        </Button>
       </div>
 
-      {error && <Alert type="error" message={error} showIcon className="admin-alert" />}
+      {error ? <Alert type="error" message={error} showIcon className="admin-alert" /> : null}
 
       <Card className="admin-table-card">
         <Form form={filterForm} layout="vertical" onFinish={handleFilterFinish}>
@@ -354,7 +361,7 @@ const InmatesManagementSection = () => {
               pageSize: pagination.pageSize,
               total: pagination.total,
               onChange: (page, pageSize) => {
-                setFilters((prev) => ({ ...prev, page, pageSize }));
+                setFilters(prev => ({ ...prev, page, pageSize }));
               }
             }}
             columns={[
@@ -372,19 +379,23 @@ const InmatesManagementSection = () => {
                 title: 'Режим',
                 dataIndex: 'security_regime',
                 key: 'security_regime',
-                render: (value) => formatSecurityRegime(value)
+                render: value => formatSecurityRegime(value)
               },
               {
                 title: 'Месячный лимит',
                 dataIndex: 'monthly_limit',
                 key: 'monthly_limit',
-                render: (value) => formatCurrency(value)
+                render: value => formatCurrency(value)
               },
               {
                 title: 'Статус',
                 dataIndex: 'is_active',
                 key: 'is_active',
-                render: (value) => <Tag color={value ? 'green' : 'default'}>{value ? 'Активен' : 'Неактивен'}</Tag>
+                render: value => (
+                  <Tag color={value ? 'green' : 'default'}>
+                    {value ? 'Активен' : 'Неактивен'}
+                  </Tag>
+                )
               },
               {
                 title: 'Действия',
@@ -417,36 +428,63 @@ const InmatesManagementSection = () => {
             <Form.Item label="ФИО" name="full_name" rules={[{ required: true, message: 'Введите ФИО' }]}>
               <Input />
             </Form.Item>
-            <Form.Item label="Email" name="email" rules={[{ required: true, message: 'Введите email' }, { type: 'email', message: 'Некорректный email' }]}>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true, message: 'Введите email' },
+                { type: 'email', message: 'Некорректный email' }
+              ]}
+            >
               <Input />
             </Form.Item>
-            <Form.Item label="Пароль" name="password" rules={[{ required: true, message: 'Введите пароль' }, { min: 8, message: 'Минимум 8 символов' }]}>
+            <Form.Item
+              label="Пароль"
+              name="password"
+              rules={[
+                { required: true, message: 'Введите пароль' },
+                { min: 8, message: 'Минимум 8 символов' }
+              ]}
+            >
               <Input.Password />
             </Form.Item>
             <Form.Item label="ИИН" name="iin" rules={[{ required: true, message: 'Введите ИИН' }]}>
               <Input maxLength={12} />
             </Form.Item>
-            <Form.Item label="Учреждение" name="facility_id" rules={[{ required: true, message: 'Выберите учреждение' }]}>
+            <Form.Item
+              label="Учреждение"
+              name="facility_id"
+              rules={[{ required: true, message: 'Выберите учреждение' }]}
+            >
               <Select options={facilityOptions} placeholder="Выберите учреждение" />
             </Form.Item>
-            <Form.Item label="Режим" name="security_regime" rules={[{ required: true, message: 'Выберите режим' }]}>
+            <Form.Item
+              label="Режим"
+              name="security_regime"
+              rules={[{ required: true, message: 'Выберите режим' }]}
+            >
               <Select options={securityRegimeOptions} placeholder="Выберите режим" />
             </Form.Item>
-            <Form.Item label="Дата перевода" name="transfer_date" rules={[{ required: true, message: 'Выберите дату перевода' }]}>
+            <Form.Item
+              label="Дата перевода"
+              name="transfer_date"
+              rules={[{ required: true, message: 'Выберите дату перевода' }]}
+            >
               <Input type="date" />
             </Form.Item>
-            <Form.Item label="Дата освобождения" name="release_date" rules={[{ required: true, message: 'Выберите дату освобождения' }]}>
+            <Form.Item
+              label="Дата освобождения"
+              name="release_date"
+              rules={[{ required: true, message: 'Выберите дату освобождения' }]}
+            >
               <Input type="date" />
-            </Form.Item>
-            <Form.Item label="Месячный лимит" name="monthly_limit" rules={[{ required: true, message: 'Введите лимит' }]}>
-              <InputNumber min={0} style={{ width: '100%' }} />
             </Form.Item>
           </div>
           <Form.Item
             label="Фото"
             name="file"
             valuePropName="fileList"
-            getValueFromEvent={(event) => (Array.isArray(event) ? event : event?.fileList)}
+            getValueFromEvent={event => (Array.isArray(event) ? event : event?.fileList)}
             rules={[{ required: true, message: 'Загрузите фото' }]}
           >
             <Upload beforeUpload={() => false} maxCount={1} accept="image/*">
@@ -469,7 +507,11 @@ const InmatesManagementSection = () => {
           <Form.Item label="ФИО" name="full_name" rules={[{ required: true, message: 'Введите ФИО' }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="Учреждение" name="facility_id" rules={[{ required: true, message: 'Выберите учреждение' }]}>
+          <Form.Item
+            label="Учреждение"
+            name="facility_id"
+            rules={[{ required: true, message: 'Выберите учреждение' }]}
+          >
             <Select options={facilityOptions} placeholder="Выберите учреждение" />
           </Form.Item>
           <Form.Item label="Активен" name="is_active" valuePropName="checked">
@@ -488,11 +530,12 @@ const InmatesManagementSection = () => {
         cancelText="Отмена"
       >
         <Form form={settingsForm} layout="vertical" onFinish={handleUpdateSettings}>
-          <Form.Item label="Режим" name="security_regime" rules={[{ required: true, message: 'Выберите режим' }]}>
+          <Form.Item
+            label="Режим"
+            name="security_regime"
+            rules={[{ required: true, message: 'Выберите режим' }]}
+          >
             <Select options={securityRegimeOptions} placeholder="Выберите режим" />
-          </Form.Item>
-          <Form.Item label="Месячный лимит" name="monthly_limit" rules={[{ required: true, message: 'Введите лимит' }]}>
-            <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>
@@ -532,25 +575,25 @@ const InmatesManagementSection = () => {
                   title: 'Статус',
                   dataIndex: 'status',
                   key: 'status',
-                  render: (value) => <Tag>{formatOrderStatus(value)}</Tag>
+                  render: value => <Tag>{formatOrderStatus(value)}</Tag>
                 },
                 {
                   title: 'Сумма',
                   dataIndex: 'total_amount',
                   key: 'total_amount',
-                  render: (value) => formatCurrency(value)
+                  render: value => formatCurrency(value)
                 },
                 {
                   title: 'Дата',
                   dataIndex: 'created_at',
                   key: 'created_at',
-                  render: (value) => formatDateTime(value)
+                  render: value => formatDateTime(value)
                 }
               ]}
               expandable={{
-                expandedRowRender: (record) => (
+                expandedRowRender: record => (
                   <div className="admin-order-items">
-                    {(record.items || []).map((item) => (
+                    {(record.items || []).map(item => (
                       <div key={item.id} className="admin-order-item-row">
                         <span>{item.product_name}</span>
                         <span>{item.quantity} шт.</span>

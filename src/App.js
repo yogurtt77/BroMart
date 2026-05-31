@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import FAQ from './pages/FAQ/FAQ';
 import Complaints from './pages/Complaints/Complaints';
@@ -59,7 +58,6 @@ function App() {
             />
           </Routes>
         </main>
-        <Footer />
       </div>
     </Router>
   );
