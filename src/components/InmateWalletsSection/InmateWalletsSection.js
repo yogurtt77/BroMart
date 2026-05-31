@@ -17,6 +17,8 @@ import './InmateWalletsSection.scss';
 
 const { Title } = Typography;
 const unwrapResponseData = payload => payload?.data ?? payload;
+const formatAmountInput = value => String(value || '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const parseAmountInput = value => Number(String(value || '').replace(/\s/g, '')) || undefined;
 
 const InmateWalletsSection = () => {
   const [form] = Form.useForm();
@@ -88,7 +90,7 @@ const InmateWalletsSection = () => {
         </Button>
       </div>
 
-      {error && <Alert type="error" message={error} showIcon className="wallets-alert" />}
+      {error ? <Alert type="error" message={error} showIcon className="wallets-alert" /> : null}
 
       <Spin spinning={fetching}>
         <div className="wallets-table-card">
@@ -168,7 +170,13 @@ const InmateWalletsSection = () => {
               name="amount"
               rules={[{ required: true, message: 'Введите сумму пополнения' }]}
             >
-              <InputNumber min={1} style={{ width: '100%' }} placeholder="Введите сумму" />
+              <InputNumber
+                min={1}
+                style={{ width: '100%' }}
+                placeholder="Введите сумму"
+                formatter={formatAmountInput}
+                parser={parseAmountInput}
+              />
             </Form.Item>
           </div>
         </Form>
