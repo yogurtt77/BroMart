@@ -76,7 +76,7 @@ const Category = () => {
                       className="vendor-card"
                       cover={
                         <div className="vendor-cover">
-                          <Image src={vendor.logo_url} alt={vendor.name} preview={false} />
+                          <Image src={vendor.logo_url} alt={vendor.name} preview={false} referrerPolicy="no-referrer"/>
                         </div>
                       }
                     >

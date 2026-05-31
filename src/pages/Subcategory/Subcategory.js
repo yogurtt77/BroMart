@@ -211,7 +211,12 @@ const Subcategory = () => {
                       className={`product-card ${viewMode === 'list' ? 'product-card--list' : ''}`}
                       cover={
                         <div className="product-cover">
-                          <Image src={itemPhoto(product)} alt={product.name} preview={false} />
+                          <Image
+                            src={itemPhoto(product)}
+                            alt={product.name}
+                            preview={false}
+                            referrerPolicy="no-referrer"
+                          />
                         </div>
                       }
                     >
