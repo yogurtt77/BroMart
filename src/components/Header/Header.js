@@ -25,7 +25,7 @@ const selectedMenuKey = pathname => {
     return '/';
   }
 
-  const prefixes = ['/admin', '/login', '/faq', '/complaints', '/contacts', '/my-orders'];
+  const prefixes = ['/admin', '/login', '/faq', '/complaints', '/contacts', '/my-orders', '/profile'];
 
   return prefixes.find(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`)) || '';
 };
@@ -61,6 +61,7 @@ const Header = () => {
   const role = getUserRole();
   const showAdmin = loggedIn && ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'].includes(role);
   const showMyOrders = loggedIn && role === 'INMATE';
+  const showProfile = loggedIn && role === 'INMATE';
   const showComplaints = loggedIn && !['WAREHOUSE_MANAGER', 'COURIER'].includes(role);
   const adminLabel = ADMIN_LABELS[role] || 'Админка';
 
@@ -71,6 +72,10 @@ const Header = () => {
 
     if (showMyOrders) {
       items.push({ key: '/my-orders', label: <Link to="/my-orders">Мои заказы</Link> });
+    }
+
+    if (showProfile) {
+      items.push({ key: '/profile', label: <Link to="/profile">Профиль</Link> });
     }
 
     items.push({ key: '/faq', label: <Link to="/faq">Вопрос-ответ</Link> });
@@ -92,7 +97,7 @@ const Header = () => {
     );
 
     return items;
-  }, [loggedIn, showAdmin, showMyOrders, showComplaints, adminLabel, handleLogout]);
+  }, [loggedIn, showAdmin, showMyOrders, showProfile, showComplaints, adminLabel, handleLogout]);
 
   const selectedKeys = selectedMenuKey(location.pathname);
   const menuSelectedKeys = selectedKeys ? [selectedKeys] : [];

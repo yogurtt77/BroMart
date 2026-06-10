@@ -12,6 +12,7 @@ import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
 import Admin from './pages/Admin/Admin';
 import MyOrders from './pages/MyOrders/MyOrders';
+import Profile from './pages/Profile/Profile';
 import { AdminRoute, InmateRoute } from './components/Routes';
 import { isAuthenticated, startAuthRefreshScheduler, stopAuthRefreshScheduler } from './utils/auth';
 
@@ -44,6 +45,14 @@ function App() {
               element={(
                 <InmateRoute>
                   <MyOrders />
+                </InmateRoute>
+              )}
+            />
+            <Route
+              path="/profile"
+              element={(
+                <InmateRoute>
+                  <Profile />
                 </InmateRoute>
               )}
             />

@@ -85,8 +85,8 @@ const AdminProfileSection = () => {
     formData.append('full_name', values.full_name);
     formData.append('facility_id', values.facility_id);
     formData.append('iin', values.iin);
-    formData.append('transfer_date', currentDate);
-    formData.append('release_date', currentDate);
+    formData.append('transfer_date', values.transfer_date || currentDate);
+    formData.append('release_date', values.release_date || currentDate);
     formData.append('security_regime', values.security_regime);
 
     const file = values.file?.[0]?.originFileObj;
@@ -267,6 +267,26 @@ const AdminProfileSection = () => {
                   options={SECURITY_MODE_OPTIONS}
                   placeholder="Выберите режим безопасности"
                 />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Дата перевода"
+                name="transfer_date"
+                rules={[{ required: true, message: 'Выберите дату перевода' }]}
+              >
+                <Input type="date" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Дата освобождения"
+                name="release_date"
+                rules={[{ required: true, message: 'Выберите дату освобождения' }]}
+              >
+                <Input type="date" />
               </Form.Item>
             </Col>
           </Row>
