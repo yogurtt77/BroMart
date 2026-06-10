@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Card, Descriptions, Spin, Typography, message } from 'antd';
+import { Alert, Button, Card, Descriptions, Spin, Typography, message } from 'antd';
 import apiClient from '../../utils/apiClient';
 import { formatDate } from '../../utils/admin';
+import { clearAuthSession, stopAuthRefreshScheduler } from '../../utils/auth';
 import './Profile.scss';
 
 const { Title, Text } = Typography;
@@ -40,6 +41,7 @@ const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -74,6 +76,19 @@ const Profile = () => {
     return () => controller.abort();
   }, []);
 
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+
+    try {
+      clearAuthSession();
+      stopAuthRefreshScheduler();
+      await new Promise(resolve => setTimeout(resolve, 250));
+      window.location.replace('/login');
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
+
   return (
     <div className="profile-page">
       <div className="page-header">
@@ -100,6 +115,16 @@ const Profile = () => {
                   items={fieldItems(profile)}
                   className="profile-descriptions"
                 />
+                <div className="profile-actions">
+                  <Button
+                    type="primary"
+                    loading={logoutLoading}
+                    onClick={handleLogout}
+                    className="profile-logout-button"
+                  >
+                    Выйти
+                  </Button>
+                </div>
               </Card>
             ) : null}
           </Spin>

@@ -50,6 +50,23 @@
   }
 }
 
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.profile-logout-button.ant-btn {
+  background: #3d6d4f;
+  border-color: #3d6d4f;
+
+  &:hover,
+  &:focus {
+    background: #2f5640 !important;
+    border-color: #2f5640 !important;
+  }
+}
+
 @media (max-width: 768px) {
   .profile-card {
     .ant-card-body {
@@ -61,5 +78,13 @@
     .ant-descriptions-item-label {
       width: 130px;
     }
+  }
+
+  .profile-actions {
+    justify-content: stretch;
+  }
+
+  .profile-logout-button.ant-btn {
+    width: 100%;
   }
 }

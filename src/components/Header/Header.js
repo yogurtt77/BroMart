@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCartOutlined } from '@ant-design/icons';
-import { Badge, Flex, Layout, Menu } from 'antd';
+import { MoreOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { Badge, Button, Dropdown, Flex, Grid, Layout, Menu } from 'antd';
 import './Header.scss';
 import { getCartCount } from '../../utils/cart';
 import {
@@ -20,6 +20,8 @@ const ADMIN_LABELS = {
   COURIER: 'Кабинет курьера'
 };
 
+const MORE_MENU_LABEL = 'Еще';
+
 const selectedMenuKey = pathname => {
   if (pathname === '/' || pathname.startsWith('/category')) {
     return '/';
@@ -32,6 +34,7 @@ const selectedMenuKey = pathname => {
 
 const Header = () => {
   const location = useLocation();
+  const screens = Grid.useBreakpoint();
   const [count, setCount] = useState(0);
   const [loggedIn, setLoggedIn] = useState(() => isAuthenticated());
 
@@ -58,23 +61,23 @@ const Header = () => {
     window.location.replace('/');
   }, []);
 
+  const handleLogoClick = useCallback(event => {
+    event.preventDefault();
+    window.location.reload();
+  }, []);
+
   const role = getUserRole();
+  const isCompactHeader = !screens.xl;
   const showAdmin = loggedIn && ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'].includes(role);
-  const showMyOrders = loggedIn && role === 'INMATE';
-  const showProfile = loggedIn && role === 'INMATE';
+  const showInmateLinks = loggedIn && role === 'INMATE';
   const showComplaints = loggedIn && !['WAREHOUSE_MANAGER', 'COURIER'].includes(role);
   const adminLabel = ADMIN_LABELS[role] || 'Админка';
 
-  const menuItems = useMemo(() => {
-    const items = [
-      { key: '/', label: <Link to="/">Категории</Link> }
-    ];
+  const desktopMenuItems = useMemo(() => {
+    const items = [{ key: '/', label: <Link to="/">Категории</Link> }];
 
-    if (showMyOrders) {
+    if (showInmateLinks) {
       items.push({ key: '/my-orders', label: <Link to="/my-orders">Мои заказы</Link> });
-    }
-
-    if (showProfile) {
       items.push({ key: '/profile', label: <Link to="/profile">Профиль</Link> });
     }
 
@@ -90,14 +93,57 @@ const Header = () => {
       items.push({ key: '/admin', label: <Link to="/admin">{adminLabel}</Link> });
     }
 
-    items.push(
-      loggedIn
-        ? { key: 'logout', label: 'Выйти', onClick: handleLogout }
-        : { key: '/login', label: <Link to="/login">Вход</Link> }
-    );
+    if (!loggedIn) {
+      items.push({ key: '/login', label: <Link to="/login">Вход</Link> });
+    }
 
     return items;
-  }, [loggedIn, showAdmin, showMyOrders, showProfile, showComplaints, adminLabel, handleLogout]);
+  }, [loggedIn, showAdmin, showComplaints, showInmateLinks, adminLabel]);
+
+  const compactMenuItems = useMemo(() => {
+    const items = [{ key: '/', label: <Link to="/">Категории</Link> }];
+
+    if (showInmateLinks) {
+      items.push({ key: '/my-orders', label: <Link to="/my-orders">Мои заказы</Link> });
+      items.push({ key: '/profile', label: <Link to="/profile">Профиль</Link> });
+    }
+
+    if (showAdmin) {
+      items.push({ key: '/admin', label: <Link to="/admin">{adminLabel}</Link> });
+    }
+
+    return items;
+  }, [showInmateLinks, showAdmin, adminLabel]);
+
+  const moreMenuItems = useMemo(() => {
+    const items = [];
+
+    if (showComplaints) {
+      items.push({ key: '/complaints', label: <Link to="/complaints">Предложения и жалобы</Link> });
+    }
+
+    items.push({ key: '/faq', label: <Link to="/faq">Вопрос-ответ</Link> });
+    items.push({ key: '/contacts', label: <Link to="/contacts">Контакты</Link> });
+
+    if (!loggedIn) {
+      items.push({ key: '/login', label: <Link to="/login">Вход</Link> });
+    }
+
+    if (loggedIn && !showInmateLinks) {
+      items.push({ key: 'logout', label: 'Выйти', danger: true });
+    }
+
+    return items;
+  }, [loggedIn, showComplaints, showInmateLinks]);
+
+  const handleMoreMenuClick = useCallback(
+    ({ key }) => {
+      if (key === 'logout') {
+        handleLogout();
+      }
+    },
+    [handleLogout]
+  );
 
   const selectedKeys = selectedMenuKey(location.pathname);
   const menuSelectedKeys = selectedKeys ? [selectedKeys] : [];
@@ -105,7 +151,7 @@ const Header = () => {
   return (
     <AntHeader className="site-header">
       <Flex className="site-header__inner" align="center" justify="space-between" gap={40}>
-        <Link to="/" className="site-header__logo">
+        <Link to="/" className="site-header__logo" onClick={handleLogoClick}>
           <img
             src="https://bromart-57.kz/wp-content/uploads/2024/05/cropped-cropped-fulllogo.png"
             alt="BROMART"
@@ -121,16 +167,30 @@ const Header = () => {
         >
           <Menu
             mode="horizontal"
-            items={menuItems}
+            items={isCompactHeader ? compactMenuItems : desktopMenuItems}
             selectedKeys={menuSelectedKeys}
             className="site-header__menu"
           />
-          {showMyOrders ? (
+          {showInmateLinks ? (
             <Badge count={count} showZero size="small" color="#3d6d4f">
               <Link to="/cart" className="site-header__cart">
                 <ShoppingCartOutlined />
               </Link>
             </Badge>
+          ) : null}
+          {isCompactHeader ? (
+            <Dropdown
+              trigger={['click']}
+              placement="bottomRight"
+              menu={{ items: moreMenuItems, onClick: handleMoreMenuClick }}
+            >
+              <Button
+                type="text"
+                aria-label={MORE_MENU_LABEL}
+                className="site-header__more-button"
+                icon={<MoreOutlined />}
+              />
+            </Dropdown>
           ) : null}
         </Flex>
       </Flex>

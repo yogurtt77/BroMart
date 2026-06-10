@@ -28,6 +28,7 @@
 
 .site-header__actions {
   min-width: 0;
+  gap: 12px;
 }
 
 .site-header__menu {
@@ -72,49 +73,22 @@
   }
 }
 
-@media (max-width: 1280px) {
-  .site-header__inner {
-    padding: 18px 24px;
-    gap: 16px !important;
-  }
+.site-header__more-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 18px;
+  padding: 0 8px;
 
-  .site-header__actions {
-    width: 100%;
-    flex-wrap: wrap;
-    gap: 12px !important;
-  }
-
-  .site-header__menu {
-    width: 100%;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-
-    .ant-menu-overflow {
-      flex-wrap: nowrap;
-    }
-
-    .ant-menu-overflow-item {
-      flex: 0 0 auto;
-    }
+  &:hover {
+    color: #3d6d4f !important;
   }
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .site-header__inner {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 16px 20px;
-  }
-
-  .site-header__logo {
-    align-self: flex-start;
-  }
-
-  .site-header__actions {
-    align-items: center;
-    justify-content: space-between;
+    padding: 16px 24px;
   }
 
   .site-header__menu {
@@ -135,11 +109,10 @@
   }
 
   .site-header__actions {
-    gap: 8px !important;
+    gap: 8px;
   }
 
   .site-header__menu {
-    gap: 0;
     font-size: 14px;
 
     .ant-menu-item,
@@ -150,5 +123,10 @@
 
   .site-header__cart {
     font-size: 20px;
+  }
+
+  .site-header__more-button {
+    font-size: 16px;
+    padding: 0 4px;
   }
 }
