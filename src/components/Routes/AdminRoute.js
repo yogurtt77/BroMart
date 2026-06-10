@@ -6,7 +6,7 @@ import ProtectedRoute from './ProtectedRoute';
 const ALLOWED_ROLES = ['SUPER_ADMIN', 'PRISON_ADMIN', 'WAREHOUSE_MANAGER', 'COURIER'];
 
 const AdminRoute = ({ children }) => (
-  <ProtectedRoute>
+  <ProtectedRoute redirectTo="/auth/login">
     {ALLOWED_ROLES.includes(getUserRole()) ? children : <Navigate to="/" replace />}
   </ProtectedRoute>
 );

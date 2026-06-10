@@ -6,6 +6,7 @@ import FAQ from './pages/FAQ/FAQ';
 import Complaints from './pages/Complaints/Complaints';
 import Contacts from './pages/Contacts/Contacts';
 import Login from './pages/Login/Login';
+import AuthLogin from './pages/AuthLogin/AuthLogin';
 import Cart from './pages/Cart/Cart';
 import Category from './pages/Category/Category';
 import Subcategory from './pages/Subcategory/Subcategory';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/complaints" element={<Complaints />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/login" element={<AuthLogin />} />
             <Route path="/cart" element={<Cart />} />
             <Route
               path="/my-orders"
@@ -47,7 +49,7 @@ function App() {
             />
             <Route path="/category/:categoryId" element={<Category />} />
             <Route path="/category/:categoryId/:subcategoryId" element={<Subcategory />} />
-            <Route path="/admin/sign" element={<Navigate to="/login" replace />} />
+            <Route path="/admin/sign" element={<Navigate to="/auth/login" replace />} />
             <Route
               path="/admin"
               element={(
@@ -64,4 +66,3 @@ function App() {
 }
 
 export default App;
-

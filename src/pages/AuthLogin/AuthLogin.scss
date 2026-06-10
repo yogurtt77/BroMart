@@ -1,0 +1,32 @@
+.auth-login-page {
+  min-height: calc(100vh - 200px);
+  padding: 80px 0 120px;
+  background:
+    radial-gradient(circle at top left, rgba(61, 109, 79, 0.12), transparent 38%),
+    radial-gradient(circle at bottom right, rgba(22, 119, 255, 0.08), transparent 42%),
+    #fff;
+}
+
+.auth-login-shell {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 16px;
+}
+
+.auth-login-card {
+  width: min(560px, 100%);
+  background: #f9f9f9;
+  padding: 48px 40px;
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.08);
+}
+
+.auth-login-title {
+  text-align: center;
+  margin: 0 0 12px;
+}
+
+.auth-login-submit {
+  margin-bottom: 0;
+}

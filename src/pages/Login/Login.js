@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, Card, Form, Input, Modal, Space, Typography, message } from 'antd';
+import { Button, Card, Modal, Space, Typography, message } from 'antd';
 import apiClient from '../../utils/apiClient';
 import { saveAuthSession, startAuthRefreshScheduler } from '../../utils/auth';
 import './Login.scss';
@@ -58,37 +57,10 @@ const faceFrameMetrics = canvas => {
 };
 
 const Login = () => {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
   const [faceLoading, setFaceLoading] = useState(false);
-  const [faceModalOpen, setFaceModalOpen] = useState(false);
+  const [faceModalOpen, setFaceModalOpen] = useState(true);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
-  const navigate = useNavigate();
-
-  const completeLogin = responseData => {
-    const body = responseData;
-    const data = body.data || body;
-    const userRole = data.user_role || body.user_role;
-
-    saveAuthSession({
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
-      token_type: data.token_type,
-      user_role: userRole
-    });
-
-    startAuthRefreshScheduler();
-    form.resetFields();
-    setFaceModalOpen(false);
-
-    if (ADMIN_ROLES.includes(userRole)) {
-      navigate('/admin');
-      return;
-    }
-
-    navigate('/');
-  };
 
   useEffect(() => {
     if (!faceModalOpen) {
@@ -116,6 +88,29 @@ const Login = () => {
       }
     };
   }, [faceModalOpen]);
+
+  const completeLogin = responseData => {
+    const body = responseData;
+    const data = body.data || body;
+    const userRole = data.user_role || body.user_role;
+
+    saveAuthSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      token_type: data.token_type,
+      user_role: userRole
+    });
+
+    startAuthRefreshScheduler();
+    setFaceModalOpen(false);
+
+    if (ADMIN_ROLES.includes(userRole)) {
+      window.location.replace('/admin');
+      return;
+    }
+
+    window.location.replace('/');
+  };
 
   const handleFaceCapture = async () => {
     const video = videoRef.current;
@@ -174,89 +169,49 @@ const Login = () => {
     }, 'image/jpeg');
   };
 
-  const handleSubmit = async values => {
-    setLoading(true);
-
-    try {
-      const response = await apiClient.post('/api/v1/auth/login', {
-        login: values.login,
-        password: values.password
-      });
-      completeLogin(response.data);
-    } catch (error) {
-      message.error(error?.response?.data?.message || 'Ошибка авторизации');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="login-page">
       <div className="page-header">
         <div className="container">
-          <h1 className="page-title">Мой аккаунт</h1>
+          <h1 className="page-title">Вход по Face ID</h1>
         </div>
       </div>
 
       <div className="content-section">
-        <Card className="form-wrapper" bordered={false}>
+        <Card className="face-login-card" bordered={false}>
           <Title level={2} className="form-title">
-            Вход
+            Авторизация заключённых
           </Title>
-
-          <Modal
-            title="Вход по Face ID"
-            open={faceModalOpen}
-            onCancel={() => setFaceModalOpen(false)}
-            destroyOnClose
-            width="min(700px, 64vw)"
-            centered
-            footer={(
-              <Space>
-                <Button onClick={() => setFaceModalOpen(false)}>Отмена</Button>
-                <Button type="primary" onClick={handleFaceCapture} loading={faceLoading}>
-                  Сделать снимок
-                </Button>
-              </Space>
-            )}
-          >
-            <p className="login-face-modal-hint">Разрешите доступ к камере в браузере.</p>
-            <div className="login-face-stage">
-              <video ref={videoRef} className="login-face-video" autoPlay playsInline muted />
-              <div className="login-face-oval" aria-hidden />
-            </div>
-          </Modal>
-
-          <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <Form.Item
-              label="Логин"
-              name="login"
-              rules={[{ required: true, message: 'Введите логин' }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Пароль"
-              name="password"
-              rules={[{ required: true, message: 'Введите пароль' }]}
-            >
-              <Input.Password />
-            </Form.Item>
-
-            <Form.Item className="login-submit-wrap">
-              <Button type="primary" htmlType="submit" block loading={loading}>
-                Войти
-              </Button>
-            </Form.Item>
-
-            <Form.Item className="login-faceid-trigger-wrap">
-              <Button type="primary" block onClick={() => setFaceModalOpen(true)}>
-                Вход по Face ID
-              </Button>
-            </Form.Item>
-          </Form>
+          <p className="face-login-copy">
+            Камера открывается автоматически. Если окно было закрыто, нажмите кнопку ниже.
+          </p>
+          <Button type="primary" onClick={() => setFaceModalOpen(true)}>
+            Открыть Face ID
+          </Button>
         </Card>
+
+        <Modal
+          title="Вход по Face ID"
+          open={faceModalOpen}
+          onCancel={() => setFaceModalOpen(false)}
+          destroyOnClose
+          width="min(700px, 64vw)"
+          centered
+          footer={(
+            <Space>
+              <Button onClick={() => setFaceModalOpen(false)}>Отмена</Button>
+              <Button type="primary" onClick={handleFaceCapture} loading={faceLoading}>
+                Сделать снимок
+              </Button>
+            </Space>
+          )}
+        >
+          <p className="login-face-modal-hint">Разрешите доступ к камере в браузере.</p>
+          <div className="login-face-stage">
+            <video ref={videoRef} className="login-face-video" autoPlay playsInline muted />
+            <div className="login-face-oval" aria-hidden />
+          </div>
+        </Modal>
       </div>
     </div>
   );

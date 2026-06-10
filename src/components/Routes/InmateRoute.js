@@ -4,7 +4,7 @@ import { getUserRole } from '../../utils/auth';
 import ProtectedRoute from './ProtectedRoute';
 
 const InmateRoute = ({ children }) => (
-  <ProtectedRoute>
+  <ProtectedRoute redirectTo="/login">
     {getUserRole() === 'INMATE' ? children : <Navigate to="/" replace />}
   </ProtectedRoute>
 );
