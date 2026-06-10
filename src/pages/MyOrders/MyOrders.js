@@ -4,6 +4,7 @@ import {
   Card,
   Divider,
   Empty,
+  Grid,
   Row,
   Space,
   Spin,
@@ -92,9 +93,11 @@ const getStatusAlert = status => {
 };
 
 const MyOrders = () => {
+  const screens = Grid.useBreakpoint();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const didLoadRef = useRef(false);
+  const timelineDirection = screens.lg ? 'horizontal' : 'vertical';
 
   useEffect(() => {
     if (didLoadRef.current) {
@@ -189,6 +192,7 @@ const MyOrders = () => {
 
                         <Steps
                           size="small"
+                          direction={timelineDirection}
                           current={getOrderTimelineStep(order.status)}
                           items={timelineItems}
                           className="my-order-steps"
